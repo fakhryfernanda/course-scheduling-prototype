@@ -16,8 +16,8 @@ class Genome:
     def count_used_rooms(self) -> int:
         pass
     
-    def check_constraint(self):
-        return ConstraintChecker(self.chromosome, verbose=True).validate()
+    def check_constraint(self, verbose):
+        return ConstraintChecker(self.chromosome, verbose).validate()
     
     def mutate(self):
         pass

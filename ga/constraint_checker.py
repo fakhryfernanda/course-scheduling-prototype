@@ -15,8 +15,8 @@ class ConstraintChecker:
         for day in range(days_count):
             start = day * SLOTS_PER_DAY
             end = start + SLOTS_PER_DAY
+            seen_keys = set()
             for t in range(start, end):
-                seen_keys = set()
                 for r in range(R):
                     val = self.chromosome[t, r]
                     if val == 0:

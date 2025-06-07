@@ -3,6 +3,7 @@ from utils import io
 from globals import *
 from typing import List
 from ga.genome import Genome
+from ga.crossover_operator import CrossoverOperator
 from dataclasses import dataclass
 from dataframes.curriculum import Curriculum
 
@@ -55,8 +56,8 @@ class GeneticAlgorithm:
     def select(self):
         pass
 
-    def crossover(self):
-        pass
+    def crossover(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
+        return CrossoverOperator().run(parent1, parent2)
 
     def evolve(self):
         pass

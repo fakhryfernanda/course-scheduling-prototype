@@ -15,5 +15,5 @@ CROSSOVER_RATE: Final[float] = 0.7
 MUTATION_RATE: Final[float] = 0.1
 
 SELECTION_METHOD: Final[str] = "tournament"
-RANDOMIZE_CROSSOVER: Final[bool] = True
+CROSSOVER_METHOD: Final[str] = "row_based"
 MUTATION_METHOD: Final[str] = "random_swap"

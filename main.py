@@ -10,7 +10,7 @@ if __name__ == '__main__':
     context = ProblemContext(
         curriculum=curriculum,
         time_slot_indices=list(range(15)),
-        room_indices=list(range(7))
+        room_indices=list(range(8))
     )
 
     ga = GeneticAlgorithm(
