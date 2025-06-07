@@ -1,6 +1,6 @@
 from globals import *
-from dataframes.curriculum import Curriculum
 from dataframes.subject import Subject
+from dataframes.curriculum import Curriculum
 from ga.genetic_algorithm import GeneticAlgorithm, ProblemContext
 
 if __name__ == '__main__':

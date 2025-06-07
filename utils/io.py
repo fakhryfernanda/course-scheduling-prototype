@@ -14,9 +14,13 @@ def export_to_txt(arr, folder="solutions", filename="solution.txt"):
     with np.printoptions(threshold=np.inf, linewidth=10000):
         arr_str = np.array2string(arr, separator=', ')
 
+    # Count non zero value
+    non_zeros = np.count_nonzero(arr)
+
     # Write to file
     with open(filepath, 'w') as f:
         f.write(arr_str + "\n\n")
+        f.write(f"Non zero value: {non_zeros}\n")
 
 def import_from_txt(folder="output", filename="output.txt"):
     filepath = os.path.join(folder, filename)

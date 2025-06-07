@@ -1,9 +1,12 @@
 from typing import Final
+from dataframes.curriculum import Curriculum
+from dataframes.subject import Subject
 
-TOTAL_DURATION: int = 0
+subjects = Subject("csv/subjects.csv")
+curriculum = Curriculum("csv/curriculum.csv", subjects.df)
 
-LOG_EVALUATION: Final[bool] = False
-CHECK_COUNTER: Final[bool] = True
+TOTAL_DURATION: Final[int] = (curriculum.df["classes"] * curriculum.df["credits"]).sum()
+
 SLOTS_PER_DAY: Final[int] = 5
 
 POPULATION_SIZE: Final[int] = 10

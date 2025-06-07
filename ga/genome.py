@@ -1,5 +1,6 @@
 import numpy as np
 from ga import generator
+from ga.constraint_checker import ConstraintChecker
 from dataframes.curriculum import Curriculum
 from typing import List
 
@@ -16,7 +17,7 @@ class Genome:
         pass
     
     def check_constraint(self):
-        pass
+        return ConstraintChecker(self.chromosome, verbose=True).validate()
     
     def mutate(self):
         pass

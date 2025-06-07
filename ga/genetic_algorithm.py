@@ -47,7 +47,10 @@ class GeneticAlgorithm:
         pass
     
     def validate(self):
-        pass
+        return [
+            genome.check_constraint()
+            for genome in self.population
+        ]
         
     def select(self):
         pass
