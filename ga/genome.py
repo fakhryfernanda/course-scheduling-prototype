@@ -17,7 +17,7 @@ class Genome:
         pass
     
     def check_constraint(self, verbose):
-        return ConstraintChecker(self.chromosome, verbose).validate()
+        return ConstraintChecker(self.chromosome, verbose=verbose).validate()
     
     def mutate(self):
         pass
