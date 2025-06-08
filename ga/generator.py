@@ -1,5 +1,6 @@
 import numpy as np
 from typing import List
+from utils.helper import is_schedule_violated
 from globals import SLOTS_PER_DAY, TOTAL_DURATION
 from dataframes.curriculum import Curriculum
 
@@ -27,14 +28,14 @@ def generate_valid_guess(curriculum: Curriculum, time_slot_indices: List[int], r
         np.random.shuffle(room_indices)
         
         session_fill = 1
-        used_time = set()
         for d in days_indices:
             placed = False
             class_fill = 1
             for t in time_slots:
-
                 row = d * SLOTS_PER_DAY + t
-                if row in used_time:
+                subjects = arr // 100
+
+                if is_schedule_violated(subjects[row].flatten(), id_):
                     continue
 
                 for r in room_indices:
@@ -50,7 +51,6 @@ def generate_valid_guess(curriculum: Curriculum, time_slot_indices: List[int], r
                     class_fill += 1
 
                 if placed:
-                    used_time.add(row)
                     break
             
             if not placed or class_fill < classes:
