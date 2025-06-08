@@ -170,8 +170,12 @@ class CrossoverOperator:
             raise Exception("Crossover failed")
         
         # Faulty check (subject session)    
-        checker = ConstraintChecker(child)
-        checker.subject_session_per_day_fix(list(range(rows)), list(range(midpoint, cols)))
+        checker = ConstraintChecker(
+            chromosome=child, 
+            row_indices=list(range(rows)), 
+            col_indices=list(range(midpoint, cols))
+        )
+        checker.subject_session_per_day_fix()
         child = checker.chromosome
 
         # Faulty check time constraint violation

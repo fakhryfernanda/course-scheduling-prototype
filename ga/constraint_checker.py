@@ -4,24 +4,30 @@ from utils.helper import get_twin, locate_twin
 from globals import SLOTS_PER_DAY, TOTAL_DURATION
 
 class ConstraintChecker:
-    def __init__(self, chromosome: np.ndarray, verbose: bool = False):
+    def __init__(
+            self, 
+            chromosome: np.ndarray, 
+            row_indices: List[int] = [], 
+            col_indices: List[int] = [],
+            verbose: bool = False
+        ):
         self.chromosome = chromosome
+
+        T, R = chromosome.shape
+        self.row_indices = list(range(T)) if not row_indices else row_indices
+        self.col_indices = list(range(R)) if not col_indices else col_indices
+
         self.verbose = verbose
         self.faulty: List[int] = []
 
     def check_frequencies(self) -> bool:
         return np.count_nonzero(self.chromosome) == TOTAL_DURATION
 
-    def subject_session_per_day_find(self, row_indices: List[int] = [], col_indices: List[int] = []) -> List[int]:
+    def subject_session_per_day_find(self) -> List[int]:
         arr = self.chromosome
-        T, R = arr.shape
-        if not row_indices:
-            row_indices = range(T)
-        if not col_indices:
-            col_indices = range(R)
 
-        for i in row_indices:
-            for j in col_indices:
+        for i in self.row_indices:
+            for j in self.col_indices:
                 val = arr[i, j]
                 if val == 0:
                     continue
@@ -51,15 +57,9 @@ class ConstraintChecker:
         
         return True
     
-    def subject_session_per_day_fix(self, row_indices: List[int], col_indices: List[int]):
+    def subject_session_per_day_fix(self):
         arr = self.chromosome
-        T, R = arr.shape
-        if not row_indices:
-            row_indices = list(range(T))
-        if not col_indices:
-            col_indices = list(range(R))
-
-        self.subject_session_per_day_find(row_indices, col_indices)
+        self.subject_session_per_day_find()
 
         for row, col in self.faulty:
             val = arr[row, col]
@@ -70,11 +70,11 @@ class ConstraintChecker:
             row_twin, col_twin = twin_location
             
             placed = False
-            for i in row_indices:
+            for i in self.row_indices:
                 if i // SLOTS_PER_DAY == row_twin // SLOTS_PER_DAY:
                     continue
 
-                for j in col_indices:
+                for j in self.col_indices:
                     if arr[i, j] == 0:
                         arr[i, j] = val
                         arr[row, col] = 0
@@ -88,6 +88,9 @@ class ConstraintChecker:
                 raise Exception("No space left to fix faulty")
             
         self.chromosome = arr
+
+    def time_constraint_find(self):
+        pass
 
     def validate(self) -> bool:
         if not self.check_frequencies():
