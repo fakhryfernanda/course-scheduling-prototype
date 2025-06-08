@@ -112,15 +112,10 @@ class GeneticAlgorithm:
             genome.check_constraint()
             for genome in self.population
         ]
-    
-    def parallel_class_config(self, genome: Genome) -> List[np.ndarray]:
-        pc = ParallelClass(genome.chromosome, self.parallel_counts)
-        return pc.get_all_schedule_matrices()
 
     def print_parallel_class_config(self, genome: Genome) -> None:
-        from math import lcm
-
-        config = self.parallel_class_config(genome)
+        config = genome.get_config(self.parallel_counts)
+        
         for idx, mat in enumerate(config, 1):
             combo = tuple(((idx - 1) % n) + 1 for n in self.parallel_counts)
             print(f"\nConfiguration {idx} {combo}:\n{mat}")
@@ -166,5 +161,3 @@ class GeneticAlgorithm:
             self.evolve()
             if self.generation > 0.95 * MAX_GENERATION:
                 self.export_population()
-
-        self.best_config = self.parallel_class_config(self.best_genome)

@@ -3,6 +3,7 @@ from ga import generator
 from ga.constraint_checker import ConstraintChecker
 from ga.mutation_operator import MutationOperator
 from ga.constraint_checker import ConstraintChecker
+from ga.parallel_class import ParallelClass
 from dataframes.curriculum import Curriculum
 from typing import List
 
@@ -26,3 +27,7 @@ class Genome:
     
     def mutate(self):
         return MutationOperator(self.chromosome).mutate()
+    
+    def get_config(self, parallel_counts: tuple[int, ...]) -> List[np.ndarray]:
+        pc = ParallelClass(self.chromosome, parallel_counts)
+        return pc.get_all_schedule_matrices()
