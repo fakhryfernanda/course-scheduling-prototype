@@ -54,6 +54,6 @@ def haversine(point1: tuple[float, float], point2: tuple[int, int]):
     a = math.sin(dphi / 2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-    return round(R * c, 2)
+    return R * c
         
 

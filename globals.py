@@ -16,9 +16,10 @@ SLOTS_PER_DAY: Final[int] = 5
 POPULATION_SIZE: Final[int] = 100
 MAX_GENERATION: Final[int] = 100
 CROSSOVER_RATE: Final[float] = 0.7
-MUTATION_RATE: Final[float] = 0.2
+MUTATION_RATE: Final[float] = 0.1
+MUTATION_POINTS: Final[int] = 3
 
+EVALUATION_METHOD: Final[str] = "average_distance"
 SELECTION_METHOD: Final[str] = "tournament"
 CROSSOVER_METHOD: Final[str] = "column_based"
 MUTATION_METHOD: Final[str] = "random_swap"
-MUTATION_POINTS: Final[int] = 5

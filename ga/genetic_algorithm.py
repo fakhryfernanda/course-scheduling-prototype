@@ -9,7 +9,6 @@ from typing import List
 from ga.genome import Genome
 from ga.crossover_operator import CrossoverOperator
 from ga.parent_selection import ParentSelection
-from ga.parallel_class import ParallelClass
 from dataclasses import dataclass
 from dataframes.curriculum import Curriculum
 
@@ -103,7 +102,11 @@ class GeneticAlgorithm:
         plt.plot(x, worst, label='Worst Fitness')
         plt.plot(x, average, label='Average Fitness')
 
+        metric = "Room Count" if EVALUATION_METHOD == "room_count" else "Average Distance"
+        ylabel = "Room Count" if EVALUATION_METHOD == "room_count" else "Average Distance (m)"
+
         info_text = (
+            f"Metric: {metric}\n"
             f"Population size: {self.population_size}\n"
             f"Crossover rate: {CROSSOVER_RATE}\n"
             f"Mutation rate: {MUTATION_RATE}\n"
@@ -114,8 +117,8 @@ class GeneticAlgorithm:
                 bbox=dict(facecolor='white', edgecolor='gray', boxstyle='round,pad=0.3'))
 
         plt.xlabel("Generation")
-        plt.ylabel("Fitness")
-        plt.title("Fitness Evaluation Over Generations")
+        plt.ylabel(ylabel)
+        plt.title(f"{metric} Fitness Evaluation Over Generations")
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
