@@ -2,6 +2,7 @@ import numpy as np
 from ga import generator
 from ga.constraint_checker import ConstraintChecker
 from ga.mutation_operator import MutationOperator
+from ga.constraint_checker import ConstraintChecker
 from dataframes.curriculum import Curriculum
 from typing import List
 
@@ -15,7 +16,10 @@ class Genome:
         return cls(guess)
     
     def count_used_rooms(self) -> int:
-        pass
+        if self.check_constraint(verbose=True):
+            return np.count_nonzero(np.any(self.chromosome != 0, axis=0))
+        else:
+            return 1000
     
     def check_constraint(self, verbose):
         return ConstraintChecker(self.chromosome, verbose=verbose).validate()
