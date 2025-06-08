@@ -9,6 +9,7 @@ from typing import List
 from ga.genome import Genome
 from ga.crossover_operator import CrossoverOperator
 from ga.parent_selection import ParentSelection
+from ga.parallel_class import ParallelClass
 from dataclasses import dataclass
 from dataframes.curriculum import Curriculum
 
@@ -108,6 +109,15 @@ class GeneticAlgorithm:
             genome.check_constraint()
             for genome in self.population
         ]
+    
+    def parallel_class_config(self):
+        parallel_counts = (6,6,6,5,5)
+
+        pc = ParallelClass(self.population[0].chromosome, parallel_counts)
+        configs = pc.get_all_schedule_matrices()
+
+        for idx, mat in enumerate(configs, 1):
+            print(f"\nConfiguration {idx}:\n{mat}")
         
     def select(self):
         return ParentSelection(method=SELECTION_METHOD).run(self.population)
