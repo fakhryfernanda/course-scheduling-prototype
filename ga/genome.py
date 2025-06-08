@@ -21,6 +21,9 @@ class Genome:
             return np.count_nonzero(np.any(self.chromosome != 0, axis=0))
         else:
             return 1000
+        
+    def count_average_distance(self) -> float:
+        pass
     
     def check_constraint(self, verbose):
         return ConstraintChecker(self.chromosome, verbose=verbose).validate()
@@ -28,6 +31,6 @@ class Genome:
     def mutate(self):
         return MutationOperator(self.chromosome).mutate()
     
-    def get_config(self, parallel_counts: tuple[int, ...]) -> List[np.ndarray]:
-        pc = ParallelClass(self.chromosome, parallel_counts)
+    def get_config(self) -> List[np.ndarray]:
+        pc = ParallelClass(self.chromosome)
         return pc.get_all_schedule_matrices()

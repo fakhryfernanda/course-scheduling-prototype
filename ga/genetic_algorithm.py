@@ -36,10 +36,11 @@ class GeneticAlgorithm:
         assert population_size % 2 == 0, "Population size must be even"
         self.population_size = population_size
 
-        self.parallel_counts = tuple(self.context.curriculum.df['classes'])
         self.population: List[Genome] = []
         self.generation: int = 0
-        self.evaluation: dict[str, FitnessStats] = {}
+
+        self.room_count_fitness: dict[str, FitnessStats] = {}
+        self.average_distance_fitness: dict[str, FitnessStats] = {}
         self.best_genome: Genome
 
         self.initialize_population()
@@ -64,7 +65,8 @@ class GeneticAlgorithm:
             genome.count_used_rooms()
             for genome in self.population
         ]
-        self.evaluation[self.generation] = FitnessStats(
+
+        self.room_count_fitness[self.generation] = FitnessStats(
             best=min(used_rooms), 
             worst=max(used_rooms), 
             average=sum(used_rooms) / self.population_size
@@ -73,10 +75,12 @@ class GeneticAlgorithm:
         return used_rooms
 
     def plot_evaluation(self):
-        x = list(self.evaluation.keys())
-        best = [self.evaluation[i].best for i in x]
-        worst = [self.evaluation[i].worst for i in x]
-        average = [self.evaluation[i].average for i in x]
+        eval = self.room_count_fitness
+
+        x = list(eval.keys())
+        best = [eval[i].best for i in x]
+        worst = [eval[i].worst for i in x]
+        average = [eval[i].average for i in x]
 
         plt.figure(figsize=(10, 6))
         plt.plot(x, best, label='Best Fitness')
@@ -114,10 +118,10 @@ class GeneticAlgorithm:
         ]
 
     def print_parallel_class_config(self, genome: Genome) -> None:
-        config = genome.get_config(self.parallel_counts)
+        config = genome.get_config()
         
         for idx, mat in enumerate(config, 1):
-            combo = tuple(((idx - 1) % n) + 1 for n in self.parallel_counts)
+            combo = tuple(((idx - 1) % n) + 1 for n in PARALLEL_COUNTS)
             print(f"\nConfiguration {idx} {combo}:\n{mat}")
         
     def select(self):

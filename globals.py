@@ -6,6 +6,7 @@ subjects = Subject("csv/subjects.csv")
 curriculum = Curriculum("csv/curriculum.csv", subjects.df)
 
 TOTAL_DURATION: Final[int] = (curriculum.df["classes"] * curriculum.df["credits"]).sum()
+PARALLEL_COUNTS: Final[tuple[int]] = tuple(curriculum.df['classes'])
 
 SLOTS_PER_DAY: Final[int] = 5
 
