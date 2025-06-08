@@ -33,12 +33,14 @@ class GeneticAlgorithm:
         ):
 
         self.context = context
-
         assert population_size % 2 == 0, "Population size must be even"
         self.population_size = population_size
+
+        self.parallel_counts = tuple(self.context.curriculum.df['classes'])
         self.population: List[Genome] = []
-        self.generation = 0
+        self.generation: int = 0
         self.evaluation: dict[str, FitnessStats] = {}
+        self.best_genome: Genome
 
         self.initialize_population()
 
@@ -82,6 +84,7 @@ class GeneticAlgorithm:
         plt.plot(x, average, label='Average Fitness')
 
         info_text = (
+            f"Population size: {self.population_size}\n"
             f"Crossover rate: {CROSSOVER_RATE}\n"
             f"Mutation rate: {MUTATION_RATE}\n"
             f"Mutation points: {MUTATION_POINTS}"
@@ -110,14 +113,17 @@ class GeneticAlgorithm:
             for genome in self.population
         ]
     
-    def parallel_class_config(self):
-        parallel_counts = (6,6,6,5,5)
+    def parallel_class_config(self, genome: Genome) -> List[np.ndarray]:
+        pc = ParallelClass(genome.chromosome, self.parallel_counts)
+        return pc.get_all_schedule_matrices()
 
-        pc = ParallelClass(self.population[0].chromosome, parallel_counts)
-        configs = pc.get_all_schedule_matrices()
+    def print_parallel_class_config(self, genome: Genome) -> None:
+        from math import lcm
 
-        for idx, mat in enumerate(configs, 1):
-            print(f"\nConfiguration {idx}:\n{mat}")
+        config = self.parallel_class_config(genome)
+        for idx, mat in enumerate(config, 1):
+            combo = tuple(((idx - 1) % n) + 1 for n in self.parallel_counts)
+            print(f"\nConfiguration {idx} {combo}:\n{mat}")
         
     def select(self):
         return ParentSelection(method=SELECTION_METHOD).run(self.population)
@@ -152,6 +158,7 @@ class GeneticAlgorithm:
 
         self.population = next_population
         self.eval()
+        self.best_genome = min(self.population, key=lambda g: g.count_used_rooms())
         self.generation += 1
 
     def run(self):
@@ -159,3 +166,5 @@ class GeneticAlgorithm:
             self.evolve()
             if self.generation > 0.95 * MAX_GENERATION:
                 self.export_population()
+
+        self.best_config = self.parallel_class_config(self.best_genome)

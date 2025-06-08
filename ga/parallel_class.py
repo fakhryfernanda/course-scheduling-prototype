@@ -5,11 +5,6 @@ from typing import List, Tuple, Dict
 
 class ParallelClass:
     def __init__(self, chromosome: np.ndarray, parallel_counts: Tuple[int, ...]):
-        """
-        Args:
-            chromosome: 2D numpy array representing the full schedule
-            parallel_counts: a tuple indicating number of parallel classes for each subject (ordered)
-        """
         self.chromosome = chromosome
         self.parallel_counts = parallel_counts
         self.rows, self.cols = chromosome.shape
@@ -28,10 +23,6 @@ class ParallelClass:
         return class_dict
 
     def get_all_schedule_matrices(self) -> List[np.ndarray]:
-        """
-        Returns:
-            List of 2D numpy arrays, each representing one LCM-based student schedule configuration
-        """
         subjects = sorted(self.class_dict.keys())
 
         if len(subjects) != len(self.parallel_counts):
