@@ -1,6 +1,7 @@
 import numpy as np
 from ga import generator
 from ga.constraint_checker import ConstraintChecker
+from ga.mutation_operator import MutationOperator
 from dataframes.curriculum import Curriculum
 from typing import List
 
@@ -20,4 +21,4 @@ class Genome:
         return ConstraintChecker(self.chromosome, verbose=verbose).validate()
     
     def mutate(self):
-        pass
+        return MutationOperator(self.chromosome).mutate()

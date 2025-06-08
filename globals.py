@@ -17,3 +17,4 @@ MUTATION_RATE: Final[float] = 0.1
 SELECTION_METHOD: Final[str] = "tournament"
 CROSSOVER_METHOD: Final[str] = "column_based"
 MUTATION_METHOD: Final[str] = "random_swap"
+MUTATION_POINTS: Final[int] = 3
