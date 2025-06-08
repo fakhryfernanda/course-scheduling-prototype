@@ -1,5 +1,5 @@
 import numpy as np
-from utils.helper import get_twin, locate_value
+from utils.helper import get_twin, locate_value, is_schedule_violated
 from globals import SLOTS_PER_DAY, MUTATION_METHOD, MUTATION_POINTS
 
 class MutationOperator:
@@ -37,6 +37,10 @@ class MutationOperator:
                     
                     if i // SLOTS_PER_DAY == row_twin // SLOTS_PER_DAY:
                         continue
+
+                _arr = arr.copy() // 100
+                if is_schedule_violated(_arr[i].flatten(), val // 100):
+                    continue
                         
                 for j in room_indices:
                     if arr[i, j] != 0:
