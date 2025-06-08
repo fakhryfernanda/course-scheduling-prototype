@@ -72,10 +72,26 @@ class GeneticAlgorithm:
             average=sum(used_rooms) / self.population_size
         )
 
+        average_distances = [
+            genome.calculate_average_distance()
+            for genome in self.population
+        ]
+
+        self.average_distance_fitness[self.generation] = FitnessStats(
+            best=min(average_distances),
+            worst=max(average_distances),
+            average=sum(average_distances) / self.population_size
+        )
+
         return used_rooms
 
-    def plot_evaluation(self):
-        eval = self.room_count_fitness
+    def plot_evaluation(self, type):
+        if type == "room_count":
+            eval = self.room_count_fitness
+        elif type == "average_distance":
+            eval = self.average_distance_fitness
+        else:
+            raise ValueError("Invalid evaluation type")
 
         x = list(eval.keys())
         best = [eval[i].best for i in x]
@@ -107,7 +123,7 @@ class GeneticAlgorithm:
         # Save to file with timestamp
         os.makedirs("evaluation", exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plt.savefig(f"evaluation/{timestamp}.png")
+        plt.savefig(f"evaluation/{type}_{timestamp}.png")
 
         plt.show()
     

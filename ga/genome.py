@@ -1,4 +1,6 @@
 import numpy as np
+from globals import COORDINATES
+from utils.helper import get_adjacent_classes, haversine
 from ga import generator
 from ga.constraint_checker import ConstraintChecker
 from ga.mutation_operator import MutationOperator
@@ -22,9 +24,24 @@ class Genome:
         else:
             return 1000
         
-    def count_average_distance(self) -> float:
-        pass
-    
+    def calculate_average_distance(self) -> float:
+        config = self.get_config()
+        result = []
+        for c in config:
+            adjacents = get_adjacent_classes(c)
+            distances = []
+            for adj in adjacents:
+                room1, room2 = adj
+                point1 = COORDINATES[room1+1]
+                point2 = COORDINATES[room2+1]
+                distance = haversine(point1, point2)
+                distances.append(distance)
+            
+            avg = sum(distances) / len(distances) if distances else 0.0
+            result.append(avg)
+
+        return sum(result) / len(result) if result else 0.0
+
     def check_constraint(self, verbose):
         return ConstraintChecker(self.chromosome, verbose=verbose).validate()
     
