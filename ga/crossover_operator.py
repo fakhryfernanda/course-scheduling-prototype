@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from utils import io
 from globals import *
 from ga.constraint_checker import ConstraintChecker
 from utils.helper import get_twin, locate_twin, is_schedule_violated
@@ -169,26 +170,17 @@ class CrossoverOperator:
         if child_counter != parent_counter:
             raise Exception("Crossover failed")
         
-        # Faulty check (subject session)    
+        # Constraint checker
         checker = ConstraintChecker(
             chromosome=child, 
             row_indices=list(range(rows)), 
             col_indices=list(range(midpoint, cols))
         )
+
+        # Fix fault
         checker.subject_session_per_day_fix()
+        checker.time_constraint_fix()
         child = checker.chromosome
-
-        # Faulty check time constraint violation
-        # faulty = []
-        # for i in range(rows):
-        #     for j in range(midpoint, cols):
-        #         val = child[i, j]
-        #         if val == 0:
-        #             continue
-
-        #         if is_schedule_violated(child[i].flatten(), val):
-        #             faulty.append((i, j))
-        #             continue
 
         return child
     

@@ -1,6 +1,7 @@
 import numpy as np
-from typing import List
-from utils.helper import get_twin, locate_twin
+from typing import List, Any
+from utils import io
+from utils.helper import get_twin, locate_twin, is_schedule_violated
 from globals import SLOTS_PER_DAY, TOTAL_DURATION
 
 class ConstraintChecker:
@@ -18,12 +19,13 @@ class ConstraintChecker:
         self.col_indices = list(range(R)) if not col_indices else col_indices
 
         self.verbose = verbose
-        self.faulty: List[int] = []
+        self.faulty: List[Any] = []
 
     def check_frequencies(self) -> bool:
         return np.count_nonzero(self.chromosome) == TOTAL_DURATION
 
     def subject_session_per_day_find(self) -> List[int]:
+        self.faulty = []
         arr = self.chromosome
 
         for i in self.row_indices:
@@ -51,15 +53,16 @@ class ConstraintChecker:
         self.subject_session_per_day_find()
         if self.faulty:
             if self.verbose:
-                val = self.fault[0]
+                i, j = self.faulty[0]
+                val = self.chromosome[i, j]
                 print(f"Multiple sessions of subject in a day of val: {val}")
             return False
         
         return True
     
     def subject_session_per_day_fix(self):
-        arr = self.chromosome
         self.subject_session_per_day_find()
+        arr = self.chromosome
 
         for row, col in self.faulty:
             val = arr[row, col]
@@ -90,7 +93,70 @@ class ConstraintChecker:
         self.chromosome = arr
 
     def time_constraint_find(self):
-        pass
+        self.faulty = []
+        arr = self.chromosome
+
+        for i in self.row_indices:
+            for j in self.col_indices:
+                val = arr[i, j]
+                if val == 0:
+                    continue
+
+                _arr = arr.copy() // 100
+                if is_schedule_violated(_arr[i].flatten(), val // 100):
+                    self.faulty.append({
+                        "val": int(val),
+                        "location": (i, j)
+                    })
+                    arr[i, j] = 0
+
+        self.chromosome = arr
+
+    def time_constraint_check(self) -> bool:
+        self.time_constraint_find()
+        if self.faulty:
+            if self.verbose:
+                i, j = self.faulty[0]["location"]
+                val = self.faulty[0]["val"]
+                print(f"Time constraint violation of val: {val} in row: {i}")
+            return False
+        
+        return True
+    
+    def time_constraint_fix(self):
+        self.time_constraint_find()
+        arr = self.chromosome
+
+        for el in self.faulty:
+            val = el["val"]
+            row, col = el["location"]
+            twin_location = locate_twin(arr, val)
+
+            placed = False
+            for i in self.row_indices:
+                if twin_location is not None:
+                    row_twin, col_twin = twin_location
+                    if i // SLOTS_PER_DAY == row_twin // SLOTS_PER_DAY:
+                        continue
+                
+                _arr = arr.copy() // 100
+                if is_schedule_violated(_arr[i].flatten(), val // 100):
+                    continue
+
+                for j in self.col_indices:
+                    if arr[i, j] == 0:
+                        arr[i, j] = val
+                        placed = True
+                        break
+
+                if placed:
+                    break
+            
+            if not placed:
+                io.export_to_txt(arr, "debug", f"child.txt")
+                raise Exception("No space left to fix faulty")
+                        
+        self.chromosome = arr
 
     def validate(self) -> bool:
         if not self.check_frequencies():
@@ -98,5 +164,7 @@ class ConstraintChecker:
                 print("Constraint failed: Frequency does not match")
             return False
         if not self.subject_session_per_day_check():
+            return False
+        if not self.time_constraint_check():
             return False
         return True
