@@ -13,6 +13,9 @@ def locate_twin(arr, val):
     twin_val = get_twin(arr, val)
     return locate_value(arr, twin_val) if twin_val else None
 
+def is_schedule_violated(arr, val):    
+    return np.any(arr) and np.any((arr != 0) & (arr != val))
+
 def get_adjacent_classes(arr):
     T, R = arr.shape
     adjacent_classes = []

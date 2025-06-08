@@ -1,7 +1,8 @@
 import random
 import numpy as np
 from globals import *
-from utils.helper import get_twin, locate_twin
+from ga.constraint_checker import ConstraintChecker
+from utils.helper import get_twin, locate_twin, is_schedule_violated
 from collections import Counter
 
 class CrossoverOperator:
@@ -18,7 +19,7 @@ class CrossoverOperator:
 
         return child
     
-    def column_based_crossover(self, p1: np.ndarray, p2: np.ndarray):
+    def column_based_crossover_old(self, p1: np.ndarray, p2: np.ndarray):
         rows, cols = p1.shape
         midpoint = cols // 2
         child = p1.copy()
@@ -119,7 +120,7 @@ class CrossoverOperator:
 
         return child
     
-    def column_based_crossover_old(self, p1: np.ndarray, p2: np.ndarray):
+    def column_based_crossover(self, p1: np.ndarray, p2: np.ndarray):
         rows, cols = p1.shape
         midpoint = cols // 2
 
@@ -163,10 +164,27 @@ class CrossoverOperator:
             i, j = empty_positions.pop()
             child[i, j] = val
 
-        # Final check
+        # Frequency check
         child_counter = Counter(child.flatten())
         if child_counter != parent_counter:
             raise Exception("Crossover failed")
+        
+        # Faulty check (subject session)    
+        checker = ConstraintChecker(child)
+        checker.subject_session_per_day_fix(list(range(rows)), list(range(midpoint, cols)))
+        child = checker.chromosome
+
+        # Faulty check time constraint violation
+        # faulty = []
+        # for i in range(rows):
+        #     for j in range(midpoint, cols):
+        #         val = child[i, j]
+        #         if val == 0:
+        #             continue
+
+        #         if is_schedule_violated(child[i].flatten(), val):
+        #             faulty.append((i, j))
+        #             continue
 
         return child
     
