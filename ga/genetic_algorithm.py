@@ -1,5 +1,8 @@
+import os
 import random
 import numpy as np
+import matplotlib.pyplot as plt
+from datetime import datetime
 from utils import io
 from globals import *
 from typing import List
@@ -15,6 +18,12 @@ class ProblemContext:
     time_slot_indices: List[int]
     room_indices: List[int]
 
+@dataclass
+class FitnessStats:
+    best: float
+    worst: float
+    average: float
+
 class GeneticAlgorithm:
     def __init__(
             self, 
@@ -28,6 +37,7 @@ class GeneticAlgorithm:
         self.population_size = population_size
         self.population: List[Genome] = []
         self.generation = 0
+        self.evaluation: dict[str, FitnessStats] = {}
 
         self.initialize_population()
 
@@ -47,10 +57,51 @@ class GeneticAlgorithm:
             io.export_to_txt(genome.chromosome, f"population/gen_{self.generation}", f"p_{i+1}.txt")
 
     def eval(self):
-        return [
+        used_rooms = [
             genome.count_used_rooms()
             for genome in self.population
         ]
+        self.evaluation[self.generation] = FitnessStats(
+            best=min(used_rooms), 
+            worst=max(used_rooms), 
+            average=sum(used_rooms) / self.population_size
+        )
+
+        return used_rooms
+
+    def plot_evaluation(self):
+        x = list(self.evaluation.keys())
+        best = [self.evaluation[i].best for i in x]
+        worst = [self.evaluation[i].worst for i in x]
+        average = [self.evaluation[i].average for i in x]
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(x, best, label='Best Fitness')
+        plt.plot(x, worst, label='Worst Fitness')
+        plt.plot(x, average, label='Average Fitness')
+
+        info_text = (
+            f"Crossover rate: {CROSSOVER_RATE}\n"
+            f"Mutation rate: {MUTATION_RATE}\n"
+            f"Mutation points: {MUTATION_POINTS}"
+        )
+        plt.text(0.01, 0.02, info_text, transform=plt.gca().transAxes,
+                fontsize=10, verticalalignment='bottom', horizontalalignment='left',
+                bbox=dict(facecolor='white', edgecolor='gray', boxstyle='round,pad=0.3'))
+
+        plt.xlabel("Generation")
+        plt.ylabel("Fitness")
+        plt.title("Fitness Evaluation Over Generations")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+
+        # Save to file with timestamp
+        os.makedirs("evaluation", exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        plt.savefig(f"evaluation/{timestamp}.png")
+
+        plt.show()
     
     def validate(self):
         return [
@@ -90,7 +141,7 @@ class GeneticAlgorithm:
                 genome.mutate()
 
         self.population = next_population
-        print(self.eval())
+        self.eval()
         self.generation += 1
 
     def run(self):
