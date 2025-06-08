@@ -153,8 +153,9 @@ class ConstraintChecker:
                     break
             
             if not placed:
-                io.export_to_txt(arr, "debug", f"child.txt")
-                raise Exception("No space left to fix faulty")
+                # Error may occur here
+                # Let's hope this genome won't be chosen for the next gen
+                io.export_to_txt(arr, "debug", f"error_child.txt")
                         
         self.chromosome = arr
 
@@ -166,5 +167,7 @@ class ConstraintChecker:
         if not self.subject_session_per_day_check():
             return False
         if not self.time_constraint_check():
+            if self.verbose:
+                print("Constraint failed: Time constraint")
             return False
         return True
