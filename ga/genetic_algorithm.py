@@ -1,9 +1,11 @@
+import random
 import numpy as np
 from utils import io
 from globals import *
 from typing import List
 from ga.genome import Genome
 from ga.crossover_operator import CrossoverOperator
+from ga.parent_selection import ParentSelection
 from dataclasses import dataclass
 from dataframes.curriculum import Curriculum
 
@@ -45,7 +47,10 @@ class GeneticAlgorithm:
             io.export_to_txt(genome.chromosome, f"population/gen_{self.generation}", f"p_{i+1}.txt")
 
     def eval(self):
-        pass
+        return [
+            genome.count_used_rooms()
+            for genome in self.population
+        ]
     
     def validate(self):
         return [
@@ -54,13 +59,42 @@ class GeneticAlgorithm:
         ]
         
     def select(self):
-        pass
+        return ParentSelection(method=SELECTION_METHOD).run(self.population)
 
     def crossover(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
         return CrossoverOperator().run(parent1, parent2)
 
     def evolve(self):
-        pass
+        next_population = []
+
+        # Selection
+        parents = self.select()
+
+        # Crossover
+        for i in range(0, len(parents), 2):
+            p1 = parents[i]
+            p2 = parents[i + 1]
+
+            identical = np.array_equal(p1.chromosome, p2.chromosome)
+            if random.random() < CROSSOVER_RATE and not identical:
+                child1 = self.crossover(p1.chromosome, p2.chromosome)
+                child2 = self.crossover(p2.chromosome, p1.chromosome)
+                next_population.append(Genome(child1))
+                next_population.append(Genome(child2))
+            else:
+                next_population.extend([Genome(p1.chromosome), Genome(p2.chromosome)])
+
+        # Mutation
+        for genome in next_population:
+            if random.random() < MUTATION_RATE:
+                genome.mutate()
+
+        self.population = next_population
+        print(self.eval())
+        self.generation += 1
 
     def run(self):
-        pass
+        for _ in range(MAX_GENERATION):
+            self.evolve()
+            if self.generation > 0.95 * MAX_GENERATION:
+                self.export_population()

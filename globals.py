@@ -9,12 +9,12 @@ TOTAL_DURATION: Final[int] = (curriculum.df["classes"] * curriculum.df["credits"
 
 SLOTS_PER_DAY: Final[int] = 5
 
-POPULATION_SIZE: Final[int] = 10
-MAX_GENERATION: Final[int] = 100
+POPULATION_SIZE: Final[int] = 100
+MAX_GENERATION: Final[int] = 500
 CROSSOVER_RATE: Final[float] = 0.7
-MUTATION_RATE: Final[float] = 0.1
+MUTATION_RATE: Final[float] = 0.3
 
 SELECTION_METHOD: Final[str] = "tournament"
 CROSSOVER_METHOD: Final[str] = "column_based"
 MUTATION_METHOD: Final[str] = "random_swap"
-MUTATION_POINTS: Final[int] = 3
+MUTATION_POINTS: Final[int] = 5
