@@ -4,4 +4,5 @@ population/**
 evaluation/**
 fig/**
 seed/**
-documentation/**
+simulation/**
+all_pareto_fronts/**
