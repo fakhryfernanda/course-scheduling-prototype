@@ -80,6 +80,7 @@ class NSGA2(GeneticAlgorithm):
         filename = timestamp if filename is None else filename
         fig.savefig(f"{folder}/{filename}.png")
         # plt.show()
+        plt.close()
 
     def non_dominated_sorting(self, population: List[Genome] = None):
         if population is None:

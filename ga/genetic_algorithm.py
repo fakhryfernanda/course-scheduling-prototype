@@ -182,6 +182,7 @@ class GeneticAlgorithm:
         plt.savefig(f"{folder}/{filename}.png")
 
         # plt.show()
+        plt.close()
 
     def plot_objective_space(self):
         f1_vals = [genome.count_used_rooms() for genome in self.population]
