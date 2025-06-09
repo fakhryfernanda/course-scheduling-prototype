@@ -29,13 +29,15 @@ class GeneticAlgorithm:
             self, 
             context: ProblemContext, 
             population_size: int,
-            max_generation: int
+            max_generation: int,
+            seed: List[np.ndarray] = None
         ):
 
         self.context = context
         assert population_size % 2 == 0, "Population size must be even"
         self.population_size = population_size
         self.max_generation = max_generation
+        self.seed = seed
 
         self.population: List[Genome] = []
         self.generation: int = 0
@@ -48,19 +50,31 @@ class GeneticAlgorithm:
         self.initialize_population()
 
     def initialize_population(self):
-        self.population = [
-            Genome.from_generator(
-                self.context.curriculum,
-                self.context.time_slot_indices,
-                self.context.room_indices
-            )
-            for _ in range(self.population_size)
-        ]
+        if self.seed is not None:
+            T = len(self.context.time_slot_indices)
+            R = len(self.context.room_indices)
+            
+            assert len(self.seed) == self.population_size, "Seed size must be equal to population size"
+            assert all([ch.shape == (T, R) for ch in self.seed]), f"Seed shape must be {(T,R)}"
+            self.population = [Genome(ch) for ch in self.seed]
+        else:
+            self.population = [
+                Genome.from_generator(
+                    self.context.curriculum,
+                    self.context.time_slot_indices,
+                    self.context.room_indices
+                )
+                for _ in range(self.population_size)
+            ]
         self.export_population()
 
     def export_population(self):
+        folder = f"population/gen_{self.generation}"
+        width = len(str(self.population_size))
+
         for i, genome in enumerate(self.population):
-            io.export_to_txt(genome.chromosome, f"population/gen_{self.generation}", f"p_{i+1}.txt")
+            filename = f"p_{i+1:0{width}d}.txt"
+            io.export_to_txt(genome.chromosome, folder, filename)
 
     def eval(self):
         used_rooms = [

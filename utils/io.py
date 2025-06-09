@@ -1,7 +1,6 @@
 import os
 import ast
 import numpy as np
-from collections import Counter
 
 def export_to_txt(arr, folder="solutions", filename="solution.txt"):
     # Ensure the folder exists
@@ -14,35 +13,33 @@ def export_to_txt(arr, folder="solutions", filename="solution.txt"):
     with np.printoptions(threshold=np.inf, linewidth=10000):
         arr_str = np.array2string(arr, separator=', ')
 
-    # Count non zero value
+    # Count non-zero values
     non_zeros = np.count_nonzero(arr)
 
     # Write to file
     with open(filepath, 'w') as f:
-        f.write(arr_str + "\n\n")
-        f.write(f"Non zero value: {non_zeros}\n")
+        f.write(arr_str + "\n")
+        f.write(f"\nNon-zero values: {non_zeros}\n")
 
-def import_from_txt(folder="output", filename="output.txt"):
+def import_from_txt(folder="solutions", filename="solution.txt"):
     filepath = os.path.join(folder, filename)
 
     with open(filepath, 'r') as f:
         lines = f.readlines()
 
-    # Extract only the array part
+    # Extract lines until a blank or metadata line
     array_lines = []
-    array_started = False
-
     for line in lines:
-        if line.strip() == "Array:":
-            array_started = True
-            continue
-        if array_started:
-            if line.strip() == "" or line.strip().startswith("Element Frequencies:"):
-                break
-            array_lines.append(line.strip())
+        stripped = line.strip()
+        if stripped == "" or "Non-zero values:" in stripped or "Element Frequencies:" in stripped:
+            break
+        array_lines.append(stripped)
 
-    array_str = "".join(array_lines)
-    
+    if not array_lines:
+        raise ValueError("No array content found in file.")
+
+    array_str = " ".join(array_lines)
+
     try:
         parsed = ast.literal_eval(array_str)
         arr = np.array(parsed, dtype=np.int16)
@@ -50,3 +47,16 @@ def import_from_txt(folder="output", filename="output.txt"):
         raise ValueError(f"Failed to parse array from file: {e}")
 
     return arr
+
+def import_all_txt_arrays(folder):
+    arrays = []
+
+    for filename in sorted(os.listdir(folder)):
+        if filename.endswith(".txt"):
+            try:
+                arr = import_from_txt(folder, filename)
+                arrays.append(arr)
+            except Exception as e:
+                print(f"Failed to import '{filename}': {e}")
+
+    return arrays
