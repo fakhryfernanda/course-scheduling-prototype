@@ -2,6 +2,7 @@ import random
 from typing import List
 from ga.genome import Genome
 from globals import EVALUATION_METHOD
+from enums.evaluation_method import EvaluationMethod
 
 class ParentSelection:
     def __init__(self, method: str):
@@ -16,9 +17,9 @@ class ParentSelection:
             raise ValueError(f"Selection method '{self.method}' is not supported.")
 
     def _tournament_selection(self, population: List[Genome]) -> List[Genome]:
-        if EVALUATION_METHOD == "room_count":
+        if EVALUATION_METHOD == EvaluationMethod.ROOM_COUNT:
             metric = lambda g: g.count_used_rooms()
-        elif EVALUATION_METHOD == "average_distance":
+        elif EVALUATION_METHOD == EvaluationMethod.AVERAGE_DISTANCE:
             metric = lambda g: g.calculate_average_distance()
         else:
             raise ValueError(f"Unknown selection criteria: {EVALUATION_METHOD}")

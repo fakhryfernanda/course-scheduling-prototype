@@ -40,6 +40,7 @@ class GeneticAlgorithm:
 
         self.room_count_fitness: dict[str, FitnessStats] = {}
         self.average_distance_fitness: dict[str, FitnessStats] = {}
+        self.average_size_fitness: dict[str, FitnessStats] = {}
         self.best_genome: Genome
 
         self.initialize_population()
@@ -82,6 +83,17 @@ class GeneticAlgorithm:
             average=sum(average_distances) / self.population_size
         )
 
+        average_sizes = [
+            genome.calculate_average_size()
+            for genome in self.population
+        ]
+
+        self.average_size_fitness[self.generation] = FitnessStats(
+            best=min(average_sizes),
+            worst=max(average_sizes),
+            average=sum(average_sizes) / self.population_size
+        )        
+
         return used_rooms
 
     def plot_evaluation(self, type):
@@ -89,6 +101,8 @@ class GeneticAlgorithm:
             eval = self.room_count_fitness
         elif type == "average_distance":
             eval = self.average_distance_fitness
+        elif type == "average_size":
+            eval = self.average_size_fitness
         else:
             raise ValueError("Invalid evaluation type")
 
@@ -102,9 +116,21 @@ class GeneticAlgorithm:
         plt.plot(x, worst, label='Worst Fitness')
         plt.plot(x, average, label='Average Fitness')
 
-        metric = "Room Count" if EVALUATION_METHOD == "room_count" else "Average Distance"
-        ylabel = "Room Count" if type == "room_count" else "Average Distance (m)"
-        title = "Room Count" if type == "room_count" else "Average Distance"
+        type_to_ylabel = {
+            "room_count": "Room Count",
+            "average_distance": "Average Distance (m)",
+            "average_size": "Average Room Size (m^2)"
+        }
+
+        type_to_title = {
+            "room_count": "Room Count",
+            "average_distance": "Average Distance",
+            "average_size": "Average Room Size"
+        }
+
+        metric = type_to_title.get(EVALUATION_METHOD, "Unknown Metric")
+        ylabel = type_to_ylabel.get(type, "Unknown Type")
+        title = type_to_title.get(type, "Unknown Type")
 
         info_text = (
             f"Metric: {metric}\n"

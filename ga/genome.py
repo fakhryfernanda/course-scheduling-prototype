@@ -1,5 +1,5 @@
 import numpy as np
-from globals import COORDINATES
+from globals import COORDINATES, SIZES
 from utils.helper import get_adjacent_classes, haversine
 from ga import generator
 from ga.constraint_checker import ConstraintChecker
@@ -17,6 +17,7 @@ class Genome:
         self.cached_config: Optional[List[np.ndarray]] = None
         self.cached_used_rooms: Optional[int] = None
         self.cached_average_distance: Optional[float] = None
+        self.cached_average_size: Optional[float] = None
         
         self.rank: Optional[int] = None
         self.dominated_set: List[Genome] = []
@@ -38,6 +39,10 @@ class Genome:
         self.cached_config = None
         self.cached_used_rooms = None
         self.cached_average_distance = None
+        self.cached_average_size = None
+
+    def get_objectives(self) -> List[Union[int, float]]:
+        return np.array([self.count_used_rooms(), self.calculate_average_distance()])
     
     def count_used_rooms(self) -> int:
         if self.cached_used_rooms is not None:
@@ -49,9 +54,6 @@ class Genome:
             return result
         else:
             return 1000
-        
-    def get_objectives(self) -> List[Union[int, float]]:
-        return np.array([self.count_used_rooms(), self.calculate_average_distance()])
         
     def calculate_average_distance(self) -> float:
         if self.cached_average_distance is not None:
@@ -75,6 +77,19 @@ class Genome:
         result_value = sum(results) / len(results) if results else 0.0
         self.cached_average_distance = result_value
         return result_value
+    
+    def calculate_average_size(self) -> float:
+        if self.cached_average_size is not None:
+            return self.cached_average_size
+        
+        config = self.get_config()
+        for c in config:
+            rooms = np.nonzero(c)[1].tolist()
+            if not rooms:
+                raise ValueError("No rooms found in the configuration")
+
+            sizes = [SIZES[room+1] for room in rooms]
+            return sum(sizes) / len(sizes)
 
     def check_constraint(self, verbose):
         return ConstraintChecker(self.chromosome, verbose=verbose).validate()
@@ -85,8 +100,9 @@ class Genome:
         self.clear_cache()
     
     def get_config(self) -> List[np.ndarray]:
-        if self.cached_config is not None:
-            pc = ParallelClass(self.chromosome)
-            return pc.get_all_schedule_matrices()
+        if self.cached_config is None:
+            config = ParallelClass(self.chromosome).get_all_schedule_matrices()
+            self.cached_config = config
+            return config
         else:
             return self.cached_config
