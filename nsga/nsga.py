@@ -69,3 +69,18 @@ class NSGA2(GeneticAlgorithm):
     def assign_crowding_distance(self):
         for front in self.fronts:
             CrowdingDistance(front).assign()
+
+    def select_next_generation(self):
+        self.non_dominated_sorting()
+
+        next_population = []
+        for front in self.fronts:
+            if len(next_population) + len(front) <= self.population_size:
+                next_population.extend(front)
+            else:
+                sorted_front = sorted(front, key=lambda g: g.crowding_distance, reverse=True)
+                remaining = self.population_size - len(next_population)
+                next_population.extend(sorted_front[:remaining])
+                break
+            
+        return next_population
