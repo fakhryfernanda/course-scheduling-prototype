@@ -21,6 +21,7 @@ CROSSOVER_RATE: Final[float] = 0.7
 MUTATION_RATE: Final[float] = 0.2
 MUTATION_POINTS: Final[int] = 5
 
+IS_MULTI_OBJECTIVE: Final[bool] = True
 EVALUATION_METHOD = EvaluationMethod.AVERAGE_SIZE
 SELECTION_METHOD: Final[str] = "tournament"
 CROSSOVER_METHOD: Final[str] = "column_based"
