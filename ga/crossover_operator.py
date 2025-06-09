@@ -11,12 +11,16 @@ class CrossoverOperator:
         pass
 
     def run(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
-        if CROSSOVER_METHOD == "column_based":
-            child = self.column_based_crossover(parent1, parent2)
-        elif CROSSOVER_METHOD == "row_based":
-            child = self.row_based_crossover(parent1, parent2)
-        else:
-            raise Exception("Invalid crossover method")
+        try:
+            if CROSSOVER_METHOD == "column_based":
+                child = self.column_based_crossover(parent1, parent2)
+            elif CROSSOVER_METHOD == "row_based":
+                child = self.row_based_crossover(parent1, parent2)
+            else:
+                raise Exception("Invalid crossover method")
+        except:
+            print("Crossover failed, parent1 returned")
+            return parent1
 
         return child
     
