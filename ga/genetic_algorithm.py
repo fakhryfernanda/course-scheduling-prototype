@@ -128,7 +128,7 @@ class GeneticAlgorithm:
             "average_size": "Average Room Size"
         }
 
-        metric = type_to_title.get(EVALUATION_METHOD, "Unknown Metric")
+        metric = type_to_title.get(EVALUATION_METHOD.value, "Unknown Metric")
         ylabel = type_to_ylabel.get(type, "Unknown Type")
         title = type_to_title.get(type, "Unknown Type")
 
