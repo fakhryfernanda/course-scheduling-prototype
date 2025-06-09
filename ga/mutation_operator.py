@@ -3,8 +3,9 @@ from utils.helper import get_twin, locate_value, is_schedule_violated
 from globals import SLOTS_PER_DAY, MUTATION_METHOD, MUTATION_POINTS
 
 class MutationOperator:
-    def __init__(self, chromosome: np.ndarray):
+    def __init__(self, chromosome: np.ndarray, mutation_points: int = MUTATION_POINTS):
         self.chromosome = chromosome
+        self.mutation_points = mutation_points
 
     def mutate(self) -> np.ndarray:
         if MUTATION_METHOD == "random_swap":
@@ -18,7 +19,7 @@ class MutationOperator:
         time_indices = list(range(T))
         room_indices = list(range(R))
 
-        for _ in range(MUTATION_POINTS):
+        for _ in range(self.mutation_points):
             row = np.random.choice(T)
             col = np.random.choice(R)
             val = arr[row, col]

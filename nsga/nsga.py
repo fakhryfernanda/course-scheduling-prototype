@@ -23,18 +23,17 @@ class NSGA2(GeneticAlgorithm):
         f1_vals = [genome.calculate_average_distance() for genome in population]
         f2_vals = [genome.calculate_average_size() for genome in population]
 
-        plt.figure(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=(8, 6))
 
         self.non_dominated_sorting()
         if color_by_rank:
             ranks = [genome.rank for genome in population]
-            scatter = plt.scatter(f1_vals, f2_vals, c=ranks, cmap='viridis', edgecolor='k', s=60)
-            cbar = plt.colorbar(scatter)
+            scatter = ax.scatter(f1_vals, f2_vals, c=ranks, cmap='viridis', edgecolor='k', s=60)
+            cbar = fig.colorbar(scatter, ax=ax)
             cbar.set_label('Pareto Rank')
         else:
-            plt.scatter(f1_vals, f2_vals, color='blue', edgecolor='k', s=60)
+            ax.scatter(f1_vals, f2_vals, color='blue', edgecolor='k', s=60)
 
-        # Optional: connect points in the same rank using same line style/color
         if connect_by_rank:
             from collections import defaultdict
             fronts = defaultdict(list)
@@ -45,27 +44,31 @@ class NSGA2(GeneticAlgorithm):
                 sorted_front = sorted(genomes_in_front, key=Genome.calculate_average_distance)
                 x = [g.calculate_average_distance() for g in sorted_front]
                 y = [g.calculate_average_size() for g in sorted_front]
-                plt.plot(x, y, linestyle='--', linewidth=1, color='black')
+                ax.plot(x, y, linestyle='--', linewidth=1, color='black')
 
-        # Add population size as a textbox
-        plt.gca().text(
-            0.02, 0.98,
-            f'Population Size: {self.population_size}',
-            transform=plt.gca().transAxes,
-            fontsize=10,
-            verticalalignment='top',
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor='gray')
+        info_text = (
+            f"Population size: {self.population_size}\n"
+            f"Max generation: {self.max_generation}\n"
+            f"Pareto front: {len(self.fronts[0])}\n"
+            f"Crossover rate: {self.crossover_rate}\n"
+            f"Mutation rate: {self.mutation_rate}\n"
+            f"Mutation points: {self.mutation_points}"
         )
 
-        plt.xlabel('Average Distance (m)')
-        plt.ylabel('Average Size (m^2)')
-        plt.title('Population Objective Space' + (' (Color by Rank)' if color_by_rank else ''))
-        plt.grid(True)
-        plt.tight_layout()
+        # Place the info text outside the axes area
+        fig.text(0.98, 0.02, info_text,
+                ha='right', va='bottom', fontsize=10,
+                bbox=dict(facecolor='white', edgecolor='gray', boxstyle='round,pad=0.3'))
+
+        ax.set_xlabel('Average Distance (m)')
+        ax.set_ylabel('Average Size (m^2)')
+        ax.set_title('Population Objective Space' + (' (Color by Rank)' if color_by_rank else ''))
+        ax.grid(True)
+        fig.tight_layout()
 
         os.makedirs("fig/objective_space", exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plt.savefig(f"fig/objective_space/{timestamp}.png")
+        fig.savefig(f"fig/objective_space/{timestamp}.png")
         plt.show()
 
     def non_dominated_sorting(self, population: List[Genome] = None):
@@ -129,7 +132,7 @@ class NSGA2(GeneticAlgorithm):
 
         # Mutation
         for genome in offspring:
-            if random.random() < MUTATION_RATE:
+            if random.random() < self.mutation_rate:
                 genome.mutate()
 
         combined = self.population + offspring
@@ -147,4 +150,3 @@ class NSGA2(GeneticAlgorithm):
     def run(self):
         for _ in range(self.max_generation):
             self.evolve()
-            self.export_population()

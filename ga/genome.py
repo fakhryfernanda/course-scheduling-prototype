@@ -14,6 +14,7 @@ class Genome:
     def __init__(self, chromosome: np.ndarray):
         self.chromosome = chromosome
 
+        self.cached_check_constraint: Optional[bool] = None
         self.cached_config: Optional[List[np.ndarray]] = None
         self.cached_used_rooms: Optional[int] = None
         self.cached_average_distance: Optional[float] = None
@@ -36,6 +37,7 @@ class Genome:
         self.crowding_distance = 0.0
 
     def clear_cache(self):
+        self.cached_check_constraint = None
         self.cached_config = None
         self.cached_used_rooms = None
         self.cached_average_distance = None
@@ -44,21 +46,27 @@ class Genome:
     def get_objectives(self) -> List[Union[int, float]]:
         return np.array([self.calculate_average_distance(), self.calculate_average_size()])
     
-    def count_used_rooms(self) -> int:
-        if self.cached_used_rooms is not None:
-            return self.cached_used_rooms
+    # def count_used_rooms(self) -> int:
+    #     if self.cached_used_rooms is not None:
+    #         return self.cached_used_rooms
         
-        if self.check_constraint(verbose=True):
-            result = np.count_nonzero(np.any(self.chromosome != 0, axis=0))
-            self.cached_used_rooms = result
-            return result
-        else:
-            return 1000
+    #     if self.check_constraint(verbose=True):
+    #         result = np.count_nonzero(np.any(self.chromosome != 0, axis=0))
+    #         self.cached_used_rooms = result
+    #         return result
+    #     else:
+    #         return 1000
         
     def calculate_average_distance(self) -> float:
         if self.cached_average_distance is not None:
             return self.cached_average_distance
         
+        if self.cached_check_constraint is None:
+            self.cached_check_constraint = self.check_constraint(verbose=True)
+        
+        if not self.cached_check_constraint:
+            return 1000.0
+                
         config = self.get_config()
         results = []
         for c in config:
@@ -81,6 +89,12 @@ class Genome:
     def calculate_average_size(self) -> float:
         if self.cached_average_size is not None:
             return self.cached_average_size
+        
+        if self.cached_check_constraint is None:
+            self.cached_check_constraint = self.check_constraint(verbose=True)
+        
+        if not self.cached_check_constraint:
+            return 0
         
         config = self.get_config()
         for c in config:

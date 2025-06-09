@@ -30,19 +30,25 @@ class GeneticAlgorithm:
             context: ProblemContext, 
             population_size: int,
             max_generation: int,
+            crossover_rate: float = CROSSOVER_RATE,
+            mutation_rate: float = MUTATION_RATE,
+            mutation_points: int = MUTATION_POINTS,
             seed: List[np.ndarray] = None
+
         ):
 
         self.context = context
         assert population_size % 2 == 0, "Population size must be even"
         self.population_size = population_size
         self.max_generation = max_generation
+        self.crossover_rate = crossover_rate
+        self.mutation_rate = mutation_rate
+        self.mutation_points = mutation_points
         self.seed = seed
-
         self.population: List[Genome] = []
         self.generation: int = 0
 
-        self.room_count_fitness: dict[str, FitnessStats] = {}
+        # self.room_count_fitness: dict[str, FitnessStats] = {}
         self.average_distance_fitness: dict[str, FitnessStats] = {}
         self.average_size_fitness: dict[str, FitnessStats] = {}
         self.best_genome: Genome
@@ -68,25 +74,25 @@ class GeneticAlgorithm:
             ]
         self.export_population()
 
-    def export_population(self):
-        folder = f"population/gen_{self.generation}"
-        width = len(str(self.population_size))
+    def export_population(self, folder: str = None):
+        folder = f"population/gen_{self.generation}" if folder is None else folder
+        width = len(str(self.max_generation))
 
         for i, genome in enumerate(self.population):
             filename = f"p_{i+1:0{width}d}.txt"
             io.export_to_txt(genome.chromosome, folder, filename)
 
-    def eval(self):
-        used_rooms = [
-            genome.count_used_rooms()
-            for genome in self.population
-        ]
+    def eval(self) -> None:
+        # used_rooms = [
+        #     genome.count_used_rooms()
+        #     for genome in self.population
+        # ]
 
-        self.room_count_fitness[self.generation] = FitnessStats(
-            best=min(used_rooms), 
-            worst=max(used_rooms), 
-            average=sum(used_rooms) / self.population_size
-        )
+        # self.room_count_fitness[self.generation] = FitnessStats(
+        #     best=min(used_rooms), 
+        #     worst=max(used_rooms), 
+        #     average=sum(used_rooms) / self.population_size
+        # )
 
         average_distances = [
             genome.calculate_average_distance()
@@ -109,8 +115,6 @@ class GeneticAlgorithm:
             worst=min(average_sizes),
             average=sum(average_sizes) / self.population_size
         )        
-
-        return used_rooms
 
     def plot_evaluation(self, type):
         if type == "room_count":
@@ -150,9 +154,9 @@ class GeneticAlgorithm:
 
         info_text = (
             f"Population size: {self.population_size}\n"
-            f"Crossover rate: {CROSSOVER_RATE}\n"
-            f"Mutation rate: {MUTATION_RATE}\n"
-            f"Mutation points: {MUTATION_POINTS}"
+            f"Crossover rate: {self.crossover_rate}\n"
+            f"Mutation rate: {self.mutation_rate}\n"
+            f"Mutation points: {self.mutation_points}"
         )
 
         if not IS_MULTI_OBJECTIVE:
@@ -234,7 +238,7 @@ class GeneticAlgorithm:
             p2 = parents[i + 1]
 
             identical = np.array_equal(p1.chromosome, p2.chromosome)
-            if random.random() < CROSSOVER_RATE and not identical:
+            if random.random() < self.crossover_rate and not identical:
                 child1 = self.crossover(p1.chromosome, p2.chromosome)
                 child2 = self.crossover(p2.chromosome, p1.chromosome)
                 next_population.append(Genome(child1))
@@ -244,7 +248,7 @@ class GeneticAlgorithm:
 
         # Mutation
         for genome in next_population:
-            if random.random() < MUTATION_RATE:
+            if random.random() < self.mutation_rate:
                 genome.mutate()
 
         self.population = next_population
