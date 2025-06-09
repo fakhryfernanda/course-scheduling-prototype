@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List
 from ga.genome import Genome
+from utils.helper import normalize_objectives
 
 class NonDominatedSorting:
     def __init__(self, population: List[Genome]):
@@ -28,8 +29,12 @@ class NonDominatedSorting:
         g1_eval = g1.get_objectives()
         g2_eval = g2.get_objectives()
 
-        no_worse = np.all(g1_eval <= g2_eval)
-        strictly_better = np.any(g1_eval < g2_eval)
+        maximize_mask = np.array([False, True])  # index 0: minimize, index 1: maximize
+        g1_norm = normalize_objectives(g1_eval, maximize_mask)
+        g2_norm = normalize_objectives(g2_eval, maximize_mask)
+
+        no_worse = np.all(g1_norm <= g2_norm)
+        strictly_better = np.any(g1_norm < g2_norm)
 
         if no_worse and strictly_better:
             g1.dominated_set.append(g2)

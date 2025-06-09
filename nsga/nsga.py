@@ -14,8 +14,8 @@ class NSGA2(GeneticAlgorithm):
         self.fronts: List[List[Genome]] = [[]]
 
     def plot_objective_space(self, color_by_rank: bool = False, connect_by_rank: bool = False):
-        f1_vals = [genome.count_used_rooms() for genome in self.population]
-        f2_vals = [genome.calculate_average_distance() for genome in self.population]
+        f1_vals = [genome.calculate_average_distance() for genome in self.population]
+        f2_vals = [genome.calculate_average_size() for genome in self.population]
 
         plt.figure(figsize=(8, 6))
 
@@ -36,9 +36,9 @@ class NSGA2(GeneticAlgorithm):
                 fronts[genome.rank].append(genome)
 
             for genomes_in_front in fronts.values():
-                sorted_front = sorted(genomes_in_front, key=lambda g: g.count_used_rooms())
-                x = [g.count_used_rooms() for g in sorted_front]
-                y = [g.calculate_average_distance() for g in sorted_front]
+                sorted_front = sorted(genomes_in_front, key=Genome.calculate_average_distance)
+                x = [g.calculate_average_distance() for g in sorted_front]
+                y = [g.calculate_average_size() for g in sorted_front]
                 plt.plot(x, y, linestyle='--', linewidth=1, color='black')
 
         # Add population size as a textbox
@@ -51,8 +51,8 @@ class NSGA2(GeneticAlgorithm):
             bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor='gray')
         )
 
-        plt.xlabel('Room Count')
-        plt.ylabel('Average Distance (m)')
+        plt.xlabel('Average Distance (m)')
+        plt.ylabel('Average Size (m^2)')
         plt.title('Population Objective Space' + (' (Color by Rank)' if color_by_rank else ''))
         plt.grid(True)
         plt.tight_layout()

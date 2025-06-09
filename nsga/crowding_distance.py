@@ -22,8 +22,8 @@ class CrowdingDistance:
             genome.crowding_distance = 0.0
 
         objectives = [
-            lambda g: g.count_used_rooms(),
-            lambda g: g.calculate_average_distance()
+            Genome.calculate_average_distance,
+            Genome.calculate_average_size
         ]
 
         for obj_func in objectives:

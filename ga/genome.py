@@ -42,7 +42,7 @@ class Genome:
         self.cached_average_size = None
 
     def get_objectives(self) -> List[Union[int, float]]:
-        return np.array([self.count_used_rooms(), self.calculate_average_distance()])
+        return np.array([self.calculate_average_distance(), self.calculate_average_size()])
     
     def count_used_rooms(self) -> int:
         if self.cached_used_rooms is not None:

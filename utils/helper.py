@@ -55,5 +55,9 @@ def haversine(point1: tuple[float, float], point2: tuple[int, int]):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
     return R * c
+
+def normalize_objectives(obj, maximize_mask: np.ndarray):
+    # maximize_mask: a boolean array indicating which objectives to maximize
+    return np.where(maximize_mask, -obj, obj)
         
 
