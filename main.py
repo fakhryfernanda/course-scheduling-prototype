@@ -22,10 +22,10 @@ if __name__ == '__main__':
 
     all_combinations = list(product(crossover_rates, mutation_rates))
     all_combinations = [(round(c, 2), round(m, 2)) for c, m in all_combinations]
-    params = random.sample(all_combinations, k=2)
+    params = random.sample(all_combinations, k=100)
     seed = io.import_all_txt_arrays("seed")
 
-    for i, param in enumerate(params):
+    for i, param in enumerate(params, start=53):
         crossover_rate, mutation_rate = param
         nsga = NSGA2(
             context=context,
@@ -38,11 +38,11 @@ if __name__ == '__main__':
         )
 
         nsga.run()
-        nsga.plot_objective_space(connect_by_rank=True, folder=f"documentation/run_{i+1}/objective_space", filename="after")
+        nsga.plot_objective_space(connect_by_rank=True, folder=f"simulation/run_{i+1}/objective_space", filename="after")
 
-        nsga.plot_evaluation(type="average_distance", folder=f"documentation/run_{i+1}/evaluation", filename="average_distance")
-        nsga.plot_evaluation(type="average_size", folder=f"documentation/run_{i+1}/evaluation", filename="average_size")
+        nsga.plot_evaluation(type="average_distance", folder=f"simulation/run_{i+1}/evaluation", filename="average_distance")
+        nsga.plot_evaluation(type="average_size", folder=f"simulation/run_{i+1}/evaluation", filename="average_size")
 
         pareto_front = nsga.fronts[0]
-        nsga.export_population(pareto_front, folder=f"documentation/run_{i+1}/fareto_front")
+        nsga.export_population(pareto_front, folder=f"simulation/run_{i+1}/fareto_front")
 
