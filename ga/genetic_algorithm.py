@@ -135,12 +135,15 @@ class GeneticAlgorithm:
         title = type_to_title.get(type, "Unknown Type")
 
         info_text = (
-            f"Metric: {metric}\n"
             f"Population size: {self.population_size}\n"
             f"Crossover rate: {CROSSOVER_RATE}\n"
             f"Mutation rate: {MUTATION_RATE}\n"
             f"Mutation points: {MUTATION_POINTS}"
         )
+
+        if not IS_MULTI_OBJECTIVE:
+            info_text = f"Metric: {metric}\n" + info_text
+            
         plt.text(0.01, 0.02, info_text, transform=plt.gca().transAxes,
                 fontsize=10, verticalalignment='bottom', horizontalalignment='left',
                 bbox=dict(facecolor='white', edgecolor='gray', boxstyle='round,pad=0.3'))
