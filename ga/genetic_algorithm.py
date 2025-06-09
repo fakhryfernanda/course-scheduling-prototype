@@ -89,8 +89,8 @@ class GeneticAlgorithm:
         ]
 
         self.average_size_fitness[self.generation] = FitnessStats(
-            best=min(average_sizes),
-            worst=max(average_sizes),
+            best=max(average_sizes),
+            worst=min(average_sizes),
             average=sum(average_sizes) / self.population_size
         )        
 

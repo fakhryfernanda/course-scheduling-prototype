@@ -21,7 +21,7 @@ CROSSOVER_RATE: Final[float] = 0.7
 MUTATION_RATE: Final[float] = 0.1
 MUTATION_POINTS: Final[int] = 3
 
-EVALUATION_METHOD = EvaluationMethod.AVERAGE_DISTANCE
+EVALUATION_METHOD = EvaluationMethod.AVERAGE_SIZE
 SELECTION_METHOD: Final[str] = "tournament"
 CROSSOVER_METHOD: Final[str] = "column_based"
 MUTATION_METHOD: Final[str] = "random_swap"
