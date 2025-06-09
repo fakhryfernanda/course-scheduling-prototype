@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from utils import io
 from globals import *
-from typing import List
+from typing import List, Optional
 from ga.genome import Genome
 from ga.crossover_operator import CrossoverOperator
 from ga.parent_selection import ParentSelection
@@ -74,11 +74,12 @@ class GeneticAlgorithm:
             ]
         self.export_population()
 
-    def export_population(self, folder: str = None):
+    def export_population(self, population: Optional[List[Genome]] = None, folder: str = None):
+        population = self.population if population is None else population
         folder = f"population/gen_{self.generation}" if folder is None else folder
         width = len(str(self.max_generation))
 
-        for i, genome in enumerate(self.population):
+        for i, genome in enumerate(population):
             filename = f"p_{i+1:0{width}d}.txt"
             io.export_to_txt(genome.chromosome, folder, filename)
 
@@ -116,7 +117,7 @@ class GeneticAlgorithm:
             average=sum(average_sizes) / self.population_size
         )        
 
-    def plot_evaluation(self, type):
+    def plot_evaluation(self, type, folder: str = None, filename:str = None):
         if type == "room_count":
             eval = self.room_count_fitness
         elif type == "average_distance":
@@ -174,11 +175,13 @@ class GeneticAlgorithm:
         plt.tight_layout()
 
         # Save to file with timestamp
-        os.makedirs("fig/evaluation", exist_ok=True)
+        folder = "fig/evaluation" if folder is None else folder
+        os.makedirs(folder, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plt.savefig(f"fig/evaluation/{type}_{timestamp}.png")
+        filename = f"{type}_{timestamp}" if filename is None else filename
+        plt.savefig(f"{folder}/{filename}.png")
 
-        plt.show()
+        # plt.show()
 
     def plot_objective_space(self):
         f1_vals = [genome.count_used_rooms() for genome in self.population]
@@ -205,7 +208,7 @@ class GeneticAlgorithm:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         plt.savefig(f"fig/objective_space/{timestamp}.png")
 
-        plt.show()
+        # plt.show()
     
     def validate(self):
         return [

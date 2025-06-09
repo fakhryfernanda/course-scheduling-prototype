@@ -22,7 +22,7 @@ subjects = Subject("csv/subjects.csv")
 curriculum = Curriculum("csv/curriculum.csv", subjects.df)
 rooms = Room("csv/rooms.csv")
 COORDINATES: Final[dict[int, tuple[float, float]]] = rooms.df.set_index('id')[['lat', 'long']].apply(tuple, axis=1).to_dict()
-SIZES: Final[dict[int, int]] = rooms.df.set_index('id')['capacity'].to_dict()
+SIZES: Final[dict[int, int]] = rooms.df.set_index('id')['size'].to_dict()
 
 TOTAL_DURATION: Final[int] = (curriculum.df["classes"] * curriculum.df["credits"]).sum()
 PARALLEL_COUNTS: Final[tuple[int]] = tuple(curriculum.df['classes'])
@@ -32,10 +32,9 @@ SLOTS_PER_DAY: Final[int] = 5
 POPULATION_SIZE: Final[int] = 100
 MAX_GENERATION: Final[int] = 100
 
-# CROSSOVER_RATE: Final[float] = 0.7
-# MUTATION_RATE: Final[float] = 0.2
-# MUTATION_POINTS: Final[int] = 5
-CROSSOVER_RATE, MUTATION_RATE, MUTATION_POINTS = all_combinations[idx]
+CROSSOVER_RATE: Final[float] = 0.7
+MUTATION_RATE: Final[float] = 0.2
+MUTATION_POINTS: Final[int] = 5
 
 IS_MULTI_OBJECTIVE: Final[bool] = True
 EVALUATION_METHOD = EvaluationMethod.AVERAGE_SIZE

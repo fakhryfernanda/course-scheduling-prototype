@@ -11,12 +11,20 @@ from nsga.non_dominated_sorting import NonDominatedSorting
 from nsga.crowding_distance import CrowdingDistance
 
 class NSGA2(GeneticAlgorithm):
-    def __init__(self, context: ProblemContext, population_size: int, max_generation: int, seed: List[np.ndarray] = None):
-        super().__init__(context, population_size, max_generation, seed)
+    def __init__(self, context: ProblemContext, population_size: int, max_generation: int, crossover_rate: float, mutation_rate: float, mutation_points: int, seed: List[np.ndarray] = None):
+        super().__init__(context, population_size, max_generation, crossover_rate, mutation_rate, mutation_points, seed)
 
         self.fronts: List[List[Genome]] = [[]]
 
-    def plot_objective_space(self, population: List[Genome] = None, color_by_rank: bool = False, connect_by_rank: bool = False):
+    def plot_objective_space(
+            self, 
+            population: List[Genome] = None, 
+            folder: str = None, 
+            filename: str = None,
+            color_by_rank: bool = False, 
+            connect_by_rank: bool = False
+        ):
+
         if population is None:
             population = self.population
 
@@ -66,10 +74,12 @@ class NSGA2(GeneticAlgorithm):
         ax.grid(True)
         fig.tight_layout()
 
-        os.makedirs("fig/objective_space", exist_ok=True)
+        folder = "fig/objective_space" if folder is None else folder
+        os.makedirs(folder, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        fig.savefig(f"fig/objective_space/{timestamp}.png")
-        plt.show()
+        filename = timestamp if filename is None else filename
+        fig.savefig(f"{folder}/{filename}.png")
+        # plt.show()
 
     def non_dominated_sorting(self, population: List[Genome] = None):
         if population is None:
