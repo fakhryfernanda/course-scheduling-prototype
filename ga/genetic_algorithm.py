@@ -230,7 +230,14 @@ class GeneticAlgorithm:
 
         self.population = next_population
         self.eval()
-        self.best_genome = min(self.population, key=lambda g: g.count_used_rooms())
+        
+        if EVALUATION_METHOD.value == "room_count":
+            self.best_genome = min(self.population, key=Genome.count_used_rooms())
+        elif EVALUATION_METHOD.value == "average_distance":
+            self.best_genome = min(self.population, key=Genome.calculate_average_distance())
+        elif EVALUATION_METHOD.value == "average_size":
+            self.best_genome = max(self.population, key=Genome.calculate_average_size())
+
         self.generation += 1
 
     def run(self):
