@@ -12,16 +12,34 @@ class NSGA2(GeneticAlgorithm):
 
         self.fronts: List[List[Genome]] = [[]]
 
-    def plot_objective_space(self):
+    def plot_objective_space(self, color_by_rank: bool = True):
         f1_vals = [genome.count_used_rooms() for genome in self.population]
         f2_vals = [genome.calculate_average_distance() for genome in self.population]
 
         plt.figure(figsize=(8, 6))
-        plt.scatter(f1_vals, f2_vals, color='blue', edgecolor='k', s=60)
+
+        if color_by_rank:
+            self.non_dominated_sorting()
+            ranks = [genome.rank for genome in self.population]
+            scatter = plt.scatter(f1_vals, f2_vals, c=ranks, cmap='viridis', edgecolor='k', s=60)
+            cbar = plt.colorbar(scatter)
+            cbar.set_label('Pareto Rank')
+        else:
+            plt.scatter(f1_vals, f2_vals, color='blue', edgecolor='k', s=60)
+
+        # Add population size as a textbox in the top-left corner
+        plt.gca().text(
+            0.02, 0.98,
+            f'Population Size: {self.population_size}',
+            transform=plt.gca().transAxes,
+            fontsize=10,
+            verticalalignment='top',
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor='gray')
+        )
 
         plt.xlabel('Room Count')
         plt.ylabel('Average Distance (m)')
-        plt.title('Population Objective Space')
+        plt.title('Population Objective Space' + (' (Color by Rank)' if color_by_rank else ''))
         plt.grid(True)
         plt.tight_layout()
 
