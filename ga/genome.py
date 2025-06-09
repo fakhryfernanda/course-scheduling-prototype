@@ -7,11 +7,19 @@ from ga.mutation_operator import MutationOperator
 from ga.constraint_checker import ConstraintChecker
 from ga.parallel_class import ParallelClass
 from dataframes.curriculum import Curriculum
-from typing import List
+from typing import List, Optional, Union
 
 class Genome:
+
     def __init__(self, chromosome: np.ndarray):
         self.chromosome = chromosome
+
+        self.cached_used_rooms: Optional[int] = None
+        self.cached_average_distance: Optional[float] = None
+        
+        self.rank: Optional[int] = None
+        self.dominated_set: List[Genome] = []
+        self.domination_count: int = 0
 
     @classmethod
     def from_generator(cls, curriculum: Curriculum, time_slot_indices: List, room_indices: List):
@@ -19,14 +27,25 @@ class Genome:
         return cls(guess)
     
     def count_used_rooms(self) -> int:
+        if self.cached_used_rooms is not None:
+            return self.cached_used_rooms
+        
         if self.check_constraint(verbose=True):
-            return np.count_nonzero(np.any(self.chromosome != 0, axis=0))
+            result = np.count_nonzero(np.any(self.chromosome != 0, axis=0))
+            self.cached_used_rooms = result
+            return result
         else:
             return 1000
         
+    def get_objectives(self) -> List[Union[int, float]]:
+        return np.array([self.count_used_rooms(), self.calculate_average_distance()])
+        
     def calculate_average_distance(self) -> float:
+        if self.cached_average_distance is not None:
+            return self.cached_average_distance
+        
         config = self.get_config()
-        result = []
+        results = []
         for c in config:
             adjacents = get_adjacent_classes(c)
             distances = []
@@ -38,9 +57,11 @@ class Genome:
                 distances.append(distance)
             
             avg = sum(distances) / len(distances) if distances else 0.0
-            result.append(avg)
+            results.append(avg)
 
-        return sum(result) / len(result) if result else 0.0
+        result_value = sum(results) / len(results) if results else 0.0
+        self.cached_average_distance = result_value
+        return result_value
 
     def check_constraint(self, verbose):
         return ConstraintChecker(self.chromosome, verbose=verbose).validate()
