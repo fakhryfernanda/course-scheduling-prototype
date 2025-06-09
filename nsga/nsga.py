@@ -12,14 +12,14 @@ class NSGA2(GeneticAlgorithm):
 
         self.fronts: List[List[Genome]] = [[]]
 
-    def plot_objective_space(self, color_by_rank: bool = True):
+    def plot_objective_space(self, color_by_rank: bool = False, connect_by_rank: bool = False):
         f1_vals = [genome.count_used_rooms() for genome in self.population]
         f2_vals = [genome.calculate_average_distance() for genome in self.population]
 
         plt.figure(figsize=(8, 6))
 
+        self.non_dominated_sorting()
         if color_by_rank:
-            self.non_dominated_sorting()
             ranks = [genome.rank for genome in self.population]
             scatter = plt.scatter(f1_vals, f2_vals, c=ranks, cmap='viridis', edgecolor='k', s=60)
             cbar = plt.colorbar(scatter)
@@ -27,7 +27,20 @@ class NSGA2(GeneticAlgorithm):
         else:
             plt.scatter(f1_vals, f2_vals, color='blue', edgecolor='k', s=60)
 
-        # Add population size as a textbox in the top-left corner
+        # Optional: connect points in the same rank using same line style/color
+        if connect_by_rank:
+            from collections import defaultdict
+            fronts = defaultdict(list)
+            for genome in self.population:
+                fronts[genome.rank].append(genome)
+
+            for genomes_in_front in fronts.values():
+                sorted_front = sorted(genomes_in_front, key=lambda g: g.count_used_rooms())
+                x = [g.count_used_rooms() for g in sorted_front]
+                y = [g.calculate_average_distance() for g in sorted_front]
+                plt.plot(x, y, linestyle='--', linewidth=1, color='black')
+
+        # Add population size as a textbox
         plt.gca().text(
             0.02, 0.98,
             f'Population Size: {self.population_size}',
@@ -43,11 +56,9 @@ class NSGA2(GeneticAlgorithm):
         plt.grid(True)
         plt.tight_layout()
 
-        # Save to file with timestamp
         os.makedirs("fig/objective_space", exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         plt.savefig(f"fig/objective_space/{timestamp}.png")
-
         plt.show()
 
     def non_dominated_sorting(self):
