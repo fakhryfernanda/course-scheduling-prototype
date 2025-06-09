@@ -28,12 +28,14 @@ class GeneticAlgorithm:
     def __init__(
             self, 
             context: ProblemContext, 
-            population_size: int, 
+            population_size: int,
+            max_generation: int
         ):
 
         self.context = context
         assert population_size % 2 == 0, "Population size must be even"
         self.population_size = population_size
+        self.max_generation = max_generation
 
         self.population: List[Genome] = []
         self.generation: int = 0
@@ -232,16 +234,16 @@ class GeneticAlgorithm:
         self.eval()
         
         if EVALUATION_METHOD.value == "room_count":
-            self.best_genome = min(self.population, key=Genome.count_used_rooms())
+            self.best_genome = min(self.population, key=Genome.count_used_rooms)
         elif EVALUATION_METHOD.value == "average_distance":
-            self.best_genome = min(self.population, key=Genome.calculate_average_distance())
+            self.best_genome = min(self.population, key=Genome.calculate_average_distance)
         elif EVALUATION_METHOD.value == "average_size":
-            self.best_genome = max(self.population, key=Genome.calculate_average_size())
+            self.best_genome = max(self.population, key=Genome.calculate_average_size)
 
         self.generation += 1
 
     def run(self):
-        for _ in range(MAX_GENERATION):
+        for _ in range(self.max_generation):
             self.evolve()
-            if self.generation > 0.95 * MAX_GENERATION:
+            if self.generation > 0.95 * self.max_generation:
                 self.export_population()

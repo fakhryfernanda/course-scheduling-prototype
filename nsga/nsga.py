@@ -1,15 +1,18 @@
 import os
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+from globals import *
 from typing import List
 from datetime import datetime
-import matplotlib.pyplot as plt
 from ga.genome import Genome
 from ga.genetic_algorithm import ProblemContext, GeneticAlgorithm
 from nsga.non_dominated_sorting import NonDominatedSorting
 from nsga.crowding_distance import CrowdingDistance
 
 class NSGA2(GeneticAlgorithm):
-    def __init__(self, context: ProblemContext, population_size: int):
-        super().__init__(context, population_size)
+    def __init__(self, context: ProblemContext, population_size: int, max_generation: int):
+        super().__init__(context, population_size, max_generation)
 
         self.fronts: List[List[Genome]] = [[]]
 
@@ -62,16 +65,19 @@ class NSGA2(GeneticAlgorithm):
         plt.savefig(f"fig/objective_space/{timestamp}.png")
         plt.show()
 
-    def non_dominated_sorting(self):
-        checker = NonDominatedSorting(self.population)
+    def non_dominated_sorting(self, population: List[Genome] = None):
+        if population is None:
+            population = self.population
+
+        checker = NonDominatedSorting(population)
         self.fronts = checker.run()
 
     def assign_crowding_distance(self):
         for front in self.fronts:
             CrowdingDistance(front).assign()
 
-    def select_next_generation(self):
-        self.non_dominated_sorting()
+    def select_next_generation(self) -> List[Genome]:
+        self.assign_crowding_distance()
 
         next_population = []
         for front in self.fronts:
@@ -82,5 +88,43 @@ class NSGA2(GeneticAlgorithm):
                 remaining = self.population_size - len(next_population)
                 next_population.extend(sorted_front[:remaining])
                 break
-            
+
         return next_population
+    
+    def evolve(self):
+        offspring = []
+
+        # Selection
+        parents = self.population
+
+        # Crossover
+        np.random.shuffle(parents)
+        for i in range(0, len(parents), 2):
+            p1 = parents[i]
+            p2 = parents[i + 1]
+
+            identical = np.array_equal(p1.chromosome, p2.chromosome)
+            if random.random() < CROSSOVER_RATE and not identical:
+                child1 = self.crossover(p1.chromosome, p2.chromosome)
+                child2 = self.crossover(p2.chromosome, p1.chromosome)
+                offspring.append(Genome(child1))
+                offspring.append(Genome(child2))
+            else:
+                offspring.extend([Genome(p1.chromosome), Genome(p2.chromosome)])
+
+        # Mutation
+        for genome in offspring:
+            if random.random() < MUTATION_RATE:
+                genome.mutate()
+
+        self.non_dominated_sorting(self.population + offspring)
+        self.population = self.select_next_generation()
+        self.non_dominated_sorting()
+
+        self.eval()
+        self.generation += 1
+
+    def run(self):
+        for _ in range(self.max_generation):
+            self.evolve()
+            self.export_population()
