@@ -6,6 +6,13 @@ class NonDominatedSorting:
     def __init__(self, population: List[Genome]):
         self.population = population
         self.population_size = len(population)
+        self.reset_state()
+
+    def reset_state(self):
+        for genome in self.population:
+            genome.dominated_set = []
+            genome.domination_count = 0
+            genome.rank = None
 
     def run(self):
         self.perform_domination_checks()
