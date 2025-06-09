@@ -103,7 +103,8 @@ class GeneticAlgorithm:
         plt.plot(x, average, label='Average Fitness')
 
         metric = "Room Count" if EVALUATION_METHOD == "room_count" else "Average Distance"
-        ylabel = "Room Count" if EVALUATION_METHOD == "room_count" else "Average Distance (m)"
+        ylabel = "Room Count" if type == "room_count" else "Average Distance (m)"
+        title = "Room Count" if type == "room_count" else "Average Distance"
 
         info_text = (
             f"Metric: {metric}\n"
@@ -118,15 +119,42 @@ class GeneticAlgorithm:
 
         plt.xlabel("Generation")
         plt.ylabel(ylabel)
-        plt.title(f"{metric} Fitness Evaluation Over Generations")
+        plt.title(f"{title} Fitness Evaluation Over Generations")
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
 
         # Save to file with timestamp
-        os.makedirs("evaluation", exist_ok=True)
+        os.makedirs("fig/evaluation", exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plt.savefig(f"evaluation/{type}_{timestamp}.png")
+        plt.savefig(f"fig/evaluation/{type}_{timestamp}.png")
+
+        plt.show()
+
+    def plot_objective_space(self):
+        f1_vals = [genome.count_used_rooms() for genome in self.population]
+        f2_vals = [genome.calculate_average_distance() for genome in self.population]
+
+        plt.figure(figsize=(8, 6))
+        plt.scatter(f1_vals, f2_vals, color='blue', edgecolor='k', s=60)
+
+        info_text = (
+            f"Population size: {self.population_size}"
+        )
+        plt.text(0.01, 0.02, info_text, transform=plt.gca().transAxes,
+                fontsize=10, verticalalignment='bottom', horizontalalignment='left',
+                bbox=dict(facecolor='white', edgecolor='gray', boxstyle='round,pad=0.3'))
+
+        plt.xlabel('Room Count')
+        plt.ylabel('Average Distance (m)')
+        plt.title('Population Objective Space')
+        plt.grid(True)
+        plt.tight_layout()
+
+        # Save to file with timestamp
+        os.makedirs("fig/objective_space", exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        plt.savefig(f"fig/objective_space/{timestamp}.png")
 
         plt.show()
     
