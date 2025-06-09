@@ -20,6 +20,7 @@ class Genome:
         self.rank: Optional[int] = None
         self.dominated_set: List[Genome] = []
         self.domination_count: int = 0
+        self.crowding_distance: float = 0.0
 
     @classmethod
     def from_generator(cls, curriculum: Curriculum, time_slot_indices: List, room_indices: List):

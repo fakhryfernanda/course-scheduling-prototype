@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from ga.genome import Genome
 from ga.genetic_algorithm import ProblemContext, GeneticAlgorithm
 from nsga.non_dominated_sorting import NonDominatedSorting
+from nsga.crowding_distance import CrowdingDistance
 
 class NSGA2(GeneticAlgorithm):
     def __init__(self, context: ProblemContext, population_size: int):
@@ -64,3 +65,7 @@ class NSGA2(GeneticAlgorithm):
     def non_dominated_sorting(self):
         checker = NonDominatedSorting(self.population)
         self.fronts = checker.run()
+
+    def assign_crowding_distance(self):
+        for front in self.fronts:
+            CrowdingDistance(front).assign()
