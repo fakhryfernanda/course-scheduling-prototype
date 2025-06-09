@@ -12,7 +12,7 @@ class MutationOperator:
         else:
             raise ValueError(f"Unsupported mutation method: {self.method}")
         
-    def random_swap(self):
+    def random_swap(self) -> np.ndarray:
         arr = self.chromosome
         T, R = arr.shape
         time_indices = list(range(T))

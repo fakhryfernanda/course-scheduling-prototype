@@ -14,7 +14,7 @@ class Genome:
     def __init__(self, chromosome: np.ndarray):
         self.chromosome = chromosome
 
-        self.cached_config: List[np.ndarray] = []
+        self.cached_config: Optional[List[np.ndarray]] = None
         self.cached_used_rooms: Optional[int] = None
         self.cached_average_distance: Optional[float] = None
         
@@ -35,7 +35,7 @@ class Genome:
         self.crowding_distance = 0.0
 
     def clear_cache(self):
-        self.cached_config = []
+        self.cached_config = None
         self.cached_used_rooms = None
         self.cached_average_distance = None
     
@@ -80,10 +80,12 @@ class Genome:
         return ConstraintChecker(self.chromosome, verbose=verbose).validate()
     
     def mutate(self):
-        return MutationOperator(self.chromosome).mutate()
+        self.chromosome = MutationOperator(self.chromosome).mutate()
+        self.reset_state()
+        self.clear_cache()
     
     def get_config(self) -> List[np.ndarray]:
-        if self.cached_config == []:
+        if self.cached_config is not None:
             pc = ParallelClass(self.chromosome)
             return pc.get_all_schedule_matrices()
         else:
