@@ -16,15 +16,18 @@ class NSGA2(GeneticAlgorithm):
 
         self.fronts: List[List[Genome]] = [[]]
 
-    def plot_objective_space(self, color_by_rank: bool = False, connect_by_rank: bool = False):
-        f1_vals = [genome.calculate_average_distance() for genome in self.population]
-        f2_vals = [genome.calculate_average_size() for genome in self.population]
+    def plot_objective_space(self, population: List[Genome] = None, color_by_rank: bool = False, connect_by_rank: bool = False):
+        if population is None:
+            population = self.population
+
+        f1_vals = [genome.calculate_average_distance() for genome in population]
+        f2_vals = [genome.calculate_average_size() for genome in population]
 
         plt.figure(figsize=(8, 6))
 
         self.non_dominated_sorting()
         if color_by_rank:
-            ranks = [genome.rank for genome in self.population]
+            ranks = [genome.rank for genome in population]
             scatter = plt.scatter(f1_vals, f2_vals, c=ranks, cmap='viridis', edgecolor='k', s=60)
             cbar = plt.colorbar(scatter)
             cbar.set_label('Pareto Rank')
@@ -35,7 +38,7 @@ class NSGA2(GeneticAlgorithm):
         if connect_by_rank:
             from collections import defaultdict
             fronts = defaultdict(list)
-            for genome in self.population:
+            for genome in population:
                 fronts[genome.rank].append(genome)
 
             for genomes_in_front in fronts.values():
@@ -75,6 +78,18 @@ class NSGA2(GeneticAlgorithm):
     def assign_crowding_distance(self):
         for front in self.fronts:
             CrowdingDistance(front).assign()
+
+    def deduplicate_population(self, population: List[Genome]):
+        unique_population = []
+        seen = set()
+
+        for genome in population:
+            key = tuple(genome.chromosome.flatten())
+            if key not in seen:
+                seen.add(key)
+                unique_population.append(genome)
+
+        return unique_population
 
     def select_next_generation(self) -> List[Genome]:
         self.assign_crowding_distance()
@@ -117,7 +132,12 @@ class NSGA2(GeneticAlgorithm):
             if random.random() < MUTATION_RATE:
                 genome.mutate()
 
-        self.non_dominated_sorting(self.population + offspring)
+        combined = self.population + offspring
+        combined = self.deduplicate_population(combined)
+        if len(combined) < self.population_size:
+            raise ValueError("Population size is not enough after deduplication")
+
+        self.non_dominated_sorting(combined)
         self.population = self.select_next_generation()
         self.non_dominated_sorting()
 
