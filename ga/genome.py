@@ -14,6 +14,7 @@ class Genome:
     def __init__(self, chromosome: np.ndarray):
         self.chromosome = chromosome
 
+        self.cached_config: List[np.ndarray] = []
         self.cached_used_rooms: Optional[int] = None
         self.cached_average_distance: Optional[float] = None
         
@@ -26,6 +27,17 @@ class Genome:
     def from_generator(cls, curriculum: Curriculum, time_slot_indices: List, room_indices: List):
         guess = generator.generate_valid_guess(curriculum, time_slot_indices, room_indices)
         return cls(guess)
+    
+    def reset_state(self):
+        self.rank = None
+        self.dominated_set = []
+        self.domination_count = 0
+        self.crowding_distance = 0.0
+
+    def clear_cache(self):
+        self.cached_config = []
+        self.cached_used_rooms = None
+        self.cached_average_distance = None
     
     def count_used_rooms(self) -> int:
         if self.cached_used_rooms is not None:
@@ -71,5 +83,8 @@ class Genome:
         return MutationOperator(self.chromosome).mutate()
     
     def get_config(self) -> List[np.ndarray]:
-        pc = ParallelClass(self.chromosome)
-        return pc.get_all_schedule_matrices()
+        if self.cached_config == []:
+            pc = ParallelClass(self.chromosome)
+            return pc.get_all_schedule_matrices()
+        else:
+            return self.cached_config
