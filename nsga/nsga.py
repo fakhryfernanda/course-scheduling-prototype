@@ -11,8 +11,8 @@ from nsga.non_dominated_sorting import NonDominatedSorting
 from nsga.crowding_distance import CrowdingDistance
 
 class NSGA2(GeneticAlgorithm):
-    def __init__(self, context: ProblemContext, population_size: int, max_generation: int):
-        super().__init__(context, population_size, max_generation)
+    def __init__(self, context: ProblemContext, population_size: int, max_generation: int, seed: List[np.ndarray] = None):
+        super().__init__(context, population_size, max_generation, seed)
 
         self.fronts: List[List[Genome]] = [[]]
 
