@@ -27,6 +27,8 @@ class ParallelClass:
         subjects = sorted(self.class_dict.keys())
 
         if len(subjects) != len(self.parallel_counts):
+            print("Subjects:", subjects)
+            print("Parallel counts:", self.parallel_counts)
             raise ValueError("Mismatch between number of subjects and parallel_counts")
 
         # Get sorted parallel session lists for each subject
