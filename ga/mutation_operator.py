@@ -11,7 +11,7 @@ class MutationOperator:
         if MUTATION_METHOD == "random_swap":
             return self.random_swap()
         else:
-            raise ValueError(f"Unsupported mutation method: {self.method}")
+            raise ValueError(f"Unsupported mutation method: {MUTATION_METHOD}")
         
     def random_swap(self) -> np.ndarray:
         arr = self.chromosome
