@@ -4,7 +4,6 @@ from utils.helper import get_adjacent_classes, haversine
 from ga import generator
 from ga.constraint_checker import ConstraintChecker
 from ga.mutation_operator import MutationOperator
-from ga.constraint_checker import ConstraintChecker
 from ga.parallel_class import ParallelClass
 from dataframes.curriculum import Curriculum
 from typing import List, Optional, Union
