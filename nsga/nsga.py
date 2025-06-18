@@ -136,10 +136,10 @@ class NSGA2(GeneticAlgorithm):
             if random.random() < CROSSOVER_RATE and not identical:
                 child1 = self.crossover(p1.chromosome, p2.chromosome)
                 child2 = self.crossover(p2.chromosome, p1.chromosome)
-                offspring.append(Genome(child1))
-                offspring.append(Genome(child2))
+                offspring.append(Genome(child1, self.config))
+                offspring.append(Genome(child2, self.config))
             else:
-                offspring.extend([Genome(p1.chromosome), Genome(p2.chromosome)])
+                offspring.extend([Genome(p1.chromosome, self.config), Genome(p2.chromosome, self.config)])
 
         # Mutation
         for genome in offspring:

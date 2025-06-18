@@ -2,13 +2,14 @@ import random
 import numpy as np
 from utils import io
 from globals import *
+from globals import Configuration
 from ga.constraint_checker import ConstraintChecker
 from utils.helper import get_twin, locate_twin, is_schedule_violated
 from collections import Counter
 
 class CrossoverOperator:
-    def __init__(self):
-        pass
+    def __init__(self, config: Configuration):
+        self.config = config
 
     def run(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
         try:
@@ -176,9 +177,10 @@ class CrossoverOperator:
         
         # Constraint checker
         checker = ConstraintChecker(
-            chromosome=child, 
-            row_indices=list(range(rows)), 
-            col_indices=list(range(midpoint, cols))
+            chromosome=child,
+            config=self.config,
+            row_indices=list(range(rows)),
+            col_indices=list(range(midpoint, cols)),
         )
 
         # Fix fault

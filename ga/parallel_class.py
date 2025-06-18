@@ -2,12 +2,12 @@ import numpy as np
 from math import lcm
 from collections import defaultdict
 from typing import List, Tuple, Dict
-from globals import PARALLEL_COUNTS
+from globals import Configuration
 
 class ParallelClass:
-    def __init__(self, chromosome: np.ndarray):
+    def __init__(self, chromosome: np.ndarray, config: Configuration):
         self.chromosome = chromosome
-        self.parallel_counts = PARALLEL_COUNTS
+        self.parallel_counts = config.parallel_counts
         self.rows, self.cols = chromosome.shape
         self.class_dict = self._extract_parallel_classes()
 
