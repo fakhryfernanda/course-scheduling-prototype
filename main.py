@@ -25,7 +25,7 @@ if __name__ == '__main__':
     params = random.sample(all_combinations, k=100)
     seed = io.import_all_txt_arrays("seed")
 
-    for i, param in enumerate(params, start=53):
+    for i, param in enumerate(params):
         crossover_rate, mutation_rate = param
         nsga = NSGA2(
             context=context,
@@ -44,5 +44,5 @@ if __name__ == '__main__':
         nsga.plot_evaluation(type="average_size", folder=f"simulation/run_{i+1}/evaluation", filename="average_size")
 
         pareto_front = nsga.fronts[0]
-        nsga.export_population(pareto_front, folder=f"simulation/run_{i+1}/fareto_front")
+        nsga.export_population(pareto_front, folder=f"simulation/run_{i+1}/pareto_front")
 
