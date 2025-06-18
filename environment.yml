@@ -1,0 +1,10 @@
+name: course-scheduling
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - notebook
+  - numpy
+  - pympler
+  - pandas
+  - matplotlib
