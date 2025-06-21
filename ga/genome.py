@@ -1,5 +1,5 @@
 import numpy as np
-from globals import COORDINATES, SIZES
+from globals import Configuration
 from utils.helper import get_adjacent_classes, haversine
 from ga import generator
 from ga.constraint_checker import ConstraintChecker
@@ -10,8 +10,9 @@ from typing import List, Optional, Union
 
 class Genome:
 
-    def __init__(self, chromosome: np.ndarray):
+    def __init__(self, chromosome: np.ndarray, config: Configuration):
         self.chromosome = chromosome
+        self.config = config
 
         self.cached_check_constraint: Optional[bool] = None
         self.cached_config: Optional[List[np.ndarray]] = None
@@ -25,9 +26,15 @@ class Genome:
         self.crowding_distance: float = 0.0
 
     @classmethod
-    def from_generator(cls, curriculum: Curriculum, time_slot_indices: List, room_indices: List):
-        guess = generator.generate_valid_guess(curriculum, time_slot_indices, room_indices)
-        return cls(guess)
+    def from_generator(
+        cls,
+        curriculum: Curriculum,
+        time_slot_indices: List,
+        room_indices: List,
+        config: Configuration,
+    ):
+        guess = generator.generate_valid_guess(curriculum, time_slot_indices, room_indices, config)
+        return cls(guess, config)
     
     def reset_state(self):
         self.rank = None
@@ -73,8 +80,8 @@ class Genome:
             distances = []
             for adj in adjacents:
                 room1, room2 = adj
-                point1 = COORDINATES[room1+1]
-                point2 = COORDINATES[room2+1]
+                point1 = self.config.coordinates[room1 + 1]
+                point2 = self.config.coordinates[room2 + 1]
                 distance = haversine(point1, point2)
                 distances.append(distance)
             
@@ -101,11 +108,11 @@ class Genome:
             if not rooms:
                 raise ValueError("No rooms found in the configuration")
 
-            sizes = [SIZES[room+1] for room in rooms]
+            sizes = [self.config.sizes[room + 1] for room in rooms]
             return sum(sizes) / len(sizes)
 
     def check_constraint(self, verbose):
-        return ConstraintChecker(self.chromosome, verbose=verbose).validate()
+        return ConstraintChecker(self.chromosome, self.config, verbose=verbose).validate()
     
     def mutate(self):
         self.chromosome = MutationOperator(self.chromosome).mutate()
@@ -114,7 +121,7 @@ class Genome:
     
     def get_config(self) -> List[np.ndarray]:
         if self.cached_config is None:
-            config = ParallelClass(self.chromosome).get_all_schedule_matrices()
+            config = ParallelClass(self.chromosome, self.config).get_all_schedule_matrices()
             self.cached_config = config
             return config
         else:

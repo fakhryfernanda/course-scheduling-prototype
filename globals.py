@@ -1,34 +1,43 @@
-import random
-from typing import Final
-from itertools import product
+from dataclasses import dataclass
+from typing import Final, Dict, Tuple
 from enums.evaluation_method import EvaluationMethod
-from dataframes.curriculum import Curriculum
 from dataframes.subject import Subject
+from dataframes.curriculum import Curriculum
 from dataframes.room import Room
 
-# Define ranges
-crossover_rates = [round(0.6 + 0.03 * i, 2) for i in range(11)]
-mutation_rates = [round(0.01 + 0.03 * i, 2) for i in range(9)]
-mutation_points = list(range(1, 6))
 
-# Generate all combinations
-all_combinations = list(product(crossover_rates, mutation_rates, mutation_points))
-
-# Pick one random index
-idx = random.randint(0, len(all_combinations) - 1)
+@dataclass
+class Configuration:
+    coordinates: Dict[int, Tuple[float, float]]
+    sizes: Dict[int, int]
+    total_duration: int
+    parallel_counts: Tuple[int, ...]
 
 
-subjects = Subject("csv/subjects.csv")
-curriculum = Curriculum("csv/curriculum.csv", subjects.df)
-rooms = Room("csv/rooms.csv")
-COORDINATES: Final[dict[int, tuple[float, float]]] = rooms.df.set_index('id')[['lat', 'long']].apply(tuple, axis=1).to_dict()
-SIZES: Final[dict[int, int]] = rooms.df.set_index('id')['size'].to_dict()
+def load_config(
+    subjects_csv: str = "csv/subjects.csv",
+    curriculum_csv: str = "csv/curriculum.csv",
+    rooms_csv: str = "csv/rooms.csv",
+) -> Configuration:
+    """Load scheduling configuration from CSV files."""
+    subjects = Subject(subjects_csv)
+    curriculum = Curriculum(curriculum_csv, subjects.df)
+    rooms = Room(rooms_csv)
 
-TOTAL_DURATION: Final[int] = (curriculum.df["classes"] * curriculum.df["credits"]).sum()
-PARALLEL_COUNTS: Final[tuple[int]] = tuple(curriculum.df['classes'])
+    coordinates = rooms.df.set_index("id")[["lat", "long"]].apply(tuple, axis=1).to_dict()
+    sizes = rooms.df.set_index("id")["size"].to_dict()
+    total_duration = int((curriculum.df["classes"] * curriculum.df["credits"]).sum())
+    parallel_counts = tuple(curriculum.df["classes"])
+
+    return Configuration(
+        coordinates=coordinates,
+        sizes=sizes,
+        total_duration=total_duration,
+        parallel_counts=parallel_counts,
+    )
+
 
 SLOTS_PER_DAY: Final[int] = 5
-
 POPULATION_SIZE: Final[int] = 100
 MAX_GENERATION: Final[int] = 100
 

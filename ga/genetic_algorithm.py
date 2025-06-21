@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from utils import io
 from globals import *
+from globals import Configuration
 from typing import List, Optional
 from ga.genome import Genome
 from ga.crossover_operator import CrossoverOperator
@@ -17,6 +18,7 @@ class ProblemContext:
     curriculum: Curriculum
     time_slot_indices: List[int]
     room_indices: List[int]
+    config: Configuration
 
 @dataclass
 class FitnessStats:
@@ -38,6 +40,7 @@ class GeneticAlgorithm:
         ):
 
         self.context = context
+        self.config = context.config
         assert population_size % 2 == 0, "Population size must be even"
         self.population_size = population_size
         self.max_generation = max_generation
@@ -62,13 +65,14 @@ class GeneticAlgorithm:
             
             assert len(self.seed) == self.population_size, "Seed size must be equal to population size"
             assert all([ch.shape == (T, R) for ch in self.seed]), f"Seed shape must be {(T,R)}"
-            self.population = [Genome(ch) for ch in self.seed]
+            self.population = [Genome(ch, self.config) for ch in self.seed]
         else:
             self.population = [
                 Genome.from_generator(
                     self.context.curriculum,
                     self.context.time_slot_indices,
-                    self.context.room_indices
+                    self.context.room_indices,
+                    self.config,
                 )
                 for _ in range(self.population_size)
             ]
@@ -221,14 +225,14 @@ class GeneticAlgorithm:
         config = genome.get_config()
         
         for idx, mat in enumerate(config, 1):
-            combo = tuple(((idx - 1) % n) + 1 for n in PARALLEL_COUNTS)
+            combo = tuple(((idx - 1) % n) + 1 for n in self.config.parallel_counts)
             print(f"\nConfiguration {idx} {combo}:\n{mat}")
         
     def select(self):
         return ParentSelection(method=SELECTION_METHOD).run(self.population)
 
     def crossover(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
-        return CrossoverOperator().run(parent1, parent2)
+        return CrossoverOperator(self.config).run(parent1, parent2)
 
     def evolve(self):
         next_population = []
@@ -245,10 +249,10 @@ class GeneticAlgorithm:
             if random.random() < self.crossover_rate and not identical:
                 child1 = self.crossover(p1.chromosome, p2.chromosome)
                 child2 = self.crossover(p2.chromosome, p1.chromosome)
-                next_population.append(Genome(child1))
-                next_population.append(Genome(child2))
+                next_population.append(Genome(child1, self.config))
+                next_population.append(Genome(child2, self.config))
             else:
-                next_population.extend([Genome(p1.chromosome), Genome(p2.chromosome)])
+                next_population.extend([Genome(p1.chromosome, self.config), Genome(p2.chromosome, self.config)])
 
         # Mutation
         for genome in next_population:

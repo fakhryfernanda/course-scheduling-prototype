@@ -2,17 +2,19 @@ import numpy as np
 from typing import List, Any
 from utils import io
 from utils.helper import get_twin, locate_twin, is_schedule_violated
-from globals import SLOTS_PER_DAY, TOTAL_DURATION
+from globals import SLOTS_PER_DAY, Configuration
 
 class ConstraintChecker:
     def __init__(
-            self, 
-            chromosome: np.ndarray, 
-            row_indices: List[int] = [], 
+            self,
+            chromosome: np.ndarray,
+            config: Configuration,
+            row_indices: List[int] = [],
             col_indices: List[int] = [],
             verbose: bool = False
         ):
         self.chromosome = chromosome
+        self.config = config
 
         T, R = chromosome.shape
         self.row_indices = list(range(T)) if not row_indices else row_indices
@@ -22,7 +24,7 @@ class ConstraintChecker:
         self.faulty: List[Any] = []
 
     def check_frequencies(self) -> bool:
-        return np.count_nonzero(self.chromosome) == TOTAL_DURATION
+        return np.count_nonzero(self.chromosome) == self.config.total_duration
 
     def subject_session_per_day_find(self) -> List[int]:
         self.faulty = []

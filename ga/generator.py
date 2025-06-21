@@ -1,16 +1,21 @@
 import numpy as np
 from typing import List
 from utils.helper import is_schedule_violated
-from globals import SLOTS_PER_DAY, TOTAL_DURATION
+from globals import SLOTS_PER_DAY, Configuration
 from dataframes.curriculum import Curriculum
 
-def generate_valid_guess(curriculum: Curriculum, time_slot_indices: List[int], room_indices: List[int]):
+def generate_valid_guess(
+    curriculum: Curriculum,
+    time_slot_indices: List[int],
+    room_indices: List[int],
+    config: Configuration,
+):
     T = len(time_slot_indices)
     R = len(room_indices)
 
     total_slots = T * R
-    
-    if TOTAL_DURATION > total_slots:
+
+    if config.total_duration > total_slots:
         raise ValueError("Not enough slots for all courses")
 
     arr = np.full((T, R), fill_value=0, dtype=np.int16)
